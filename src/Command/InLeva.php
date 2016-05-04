@@ -41,5 +41,7 @@ class InLeva extends CommandBase
     {
         $account = $input->getArgument('account');
         $output->writeln('Chosen account: ' . $account);
+        $output->writeln('Your username: ' . $this->getConfig()->get('credentials.username'));
     }
+
 }
