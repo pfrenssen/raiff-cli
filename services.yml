@@ -1,0 +1,7 @@
+services:
+  config:
+    class: RaiffCli\Config
+    arguments: ["@parser"]
+  parser:
+    class: Symfony\Component\Yaml\Parser
+    lazy: true
