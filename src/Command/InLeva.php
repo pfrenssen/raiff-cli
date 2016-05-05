@@ -36,7 +36,7 @@ class InLeva extends CommandBase
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $config = $this->getConfig();
+        $config = $this->getConfigManager()->get('config.yml');
         $account = $input->getArgument('account');
         $output->writeln('Chosen account: ' . $account);
         $output->writeln('Your username: ' . $config->get('credentials.username'));

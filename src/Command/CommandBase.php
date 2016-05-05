@@ -16,11 +16,14 @@ abstract class CommandBase extends Command
     }
 
     /**
-     * @return \RaiffCli\Config
+     * Returns the configuration manager.
+     *
+     * @return \RaiffCli\Config\ConfigManager
+     *   The configuration manager.
      */
-    protected function getConfig()
+    protected function getConfigManager()
     {
-       return $this->getContainer()->get('config');
+       return $this->getContainer()->get('config.manager');
     }
 
 }

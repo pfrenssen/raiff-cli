@@ -1,6 +1,6 @@
 services:
-  config:
-    class: RaiffCli\Config
+  config.manager:
+    class: RaiffCli\Config\ConfigManager
     arguments: ["@parser"]
   parser:
     class: Symfony\Component\Yaml\Parser
