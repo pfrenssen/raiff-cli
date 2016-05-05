@@ -4,11 +4,17 @@ namespace RaiffCli\Command;
 
 use Symfony\Component\Console\Command\Command;
 
+/**
+ * Base class for commands.
+ */
 abstract class CommandBase extends Command
 {
 
     /**
+     * Returns the dependency injection container helper.
+     *
      * @return \RaiffCli\Helper\ContainerHelper
+     *   The dependency injection container helper.
      */
     protected function getContainer()
     {
