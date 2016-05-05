@@ -3,3 +3,13 @@ base_url: 'https://online.rbb.bg/page/default.aspx?user_id=&session_id=&xml_id=/
 credentials:
   username: 'my username'
   password: 'my password'
+
+mink:
+  default_session: 'phantomjs'
+  sessions:
+    phantomjs:
+      host: 'http://127.0.0.1:8510'
+      template_cache: 'tmp'
+    selenium2:
+      browser: 'firefox'
+      host: 'http://localhost:4444/wd/hub'
