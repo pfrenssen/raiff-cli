@@ -2,6 +2,7 @@
 
 namespace RaiffCli\Config;
 
+use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\Yaml\Parser;
 
 /**
@@ -17,14 +18,24 @@ class ConfigManager {
     protected $parser;
 
     /**
+     * The Yaml dumper.
+     *
+     * @var \Symfony\Component\Yaml\Dumper
+     */
+    protected $dumper;
+
+    /**
      * Config constructor.
      *
      * @param \Symfony\Component\Yaml\Parser $parser
      *   The Yaml parser.
+     * @param \Symfony\Component\Yaml\Dumper $dumper
+     *   The Yaml dumper.
      */
-    public function __construct(Parser $parser)
+    public function __construct(Parser $parser, Dumper $dumper)
     {
         $this->parser = $parser;
+        $this->dumper = $dumper;
     }
 
     /**
@@ -37,7 +48,7 @@ class ConfigManager {
      */
     public function get($filename)
     {
-        return new Config($this->parser, $filename);
+        return new Config($this->parser, $this->dumper, $filename);
     }
 
 }

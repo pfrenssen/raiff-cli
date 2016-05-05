@@ -1,7 +1,10 @@
 services:
   config.manager:
     class: RaiffCli\Config\ConfigManager
-    arguments: ["@parser"]
+    arguments: ["@parser", "@dumper"]
+  dumper:
+    class: Symfony\Component\Yaml\Dumper
+    lazy: true
   parser:
     class: Symfony\Component\Yaml\Parser
     lazy: true

@@ -2,6 +2,7 @@
 
 namespace RaiffCli\Config;
 
+use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\Yaml\Parser;
 
 /**
@@ -32,16 +33,26 @@ class Config
     protected $parser;
 
     /**
+     * The Yaml dumper.
+     *
+     * @var \Symfony\Component\Yaml\Dumper
+     */
+    protected $dumper;
+
+    /**
      * Config constructor.
      *
      * @param \Symfony\Component\Yaml\Parser $parser
      *   The Yaml parser.
+     * @param \Symfony\Component\Yaml\Dumper $dumper
+     *   The Yaml dumper.
      * @param string $filename
      *   The name of the config file to parse, without .yml extension.
      */
-    public function __construct(Parser $parser, $filename)
+    public function __construct(Parser $parser, Dumper $dumper, $filename)
     {
         $this->parser = $parser;
+        $this->dumper = $dumper;
         $this->path = __DIR__ . "/../../config/$filename.yml";
 
         // The optional '.dist' file contains default values. Load this first,
@@ -87,6 +98,36 @@ class Config
             }
         }
         return $config;
+    }
+
+    /**
+     * Stores the given value in the configuration.
+     *
+     * @param string $key
+     *   The configuration key. Separate hierarchical keys with a period.
+     * @param mixed $value
+     *   The value to set.
+     */
+    public function set($key, $value)
+    {
+        $keys = explode('.', $key);
+        $config = &$this->config;
+        foreach ($keys as $key) {
+            if (!isset($config[$key])) {
+                $config[$key] = [];
+            }
+            $config = &$config[$key];
+        }
+        $config = $value;
+    }
+
+    /**
+     * Saves the current configuration to file storage.
+     */
+    public function save()
+    {
+        $yaml = $this->dumper->dump($this->config, 5);
+        file_put_contents($this->path, $yaml);
     }
 
     /**
