@@ -79,22 +79,20 @@ class Config
      *
      * @param string $key
      *   The configuration key. Separate hierarchical keys with a period.
+     * @param mixed $default
+     *   The default value to return if the configuration element is not set.
+     *
      * @return array|mixed
      *   The requested configuration.
-     *
-     * @throws \InvalidArgumentException
-     *   Thrown when the configuration element with the given key does not
-     *   exist.
      */
-    public function get($key)
+    public function get($key, $default = '')
     {
         $config = $this->config;
         foreach (explode('.', $key) as $element) {
             if (!empty($config[$element])) {
                 $config = $config[$element];
-            }
-            else {
-                throw new \InvalidArgumentException("There is no configuration item with key '$key'.");
+            } else {
+                return $default;
             }
         }
         return $config;
