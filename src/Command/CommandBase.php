@@ -40,6 +40,25 @@ abstract class CommandBase extends Command
     }
 
     /**
+     * Validator for required arguments.
+     *
+     * @param string $input
+     *   The input from the user.
+     *
+     * @return string
+     *   The input from the user.
+     *
+     * @throws \InvalidArgumentException
+     *   Thrown when the input is empty.
+     */
+    public static function requiredValidator($input) {
+        if (empty(trim($input))) {
+            throw new \InvalidArgumentException('Please enter a value.');
+        }
+        return $input;
+    }
+
+    /**
      * Returns the dependency injection container helper.
      *
      * @return \RaiffCli\Helper\ContainerHelper

@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+use RaiffCli\Command\AccountAdd;
 use RaiffCli\Command\Transfer\InLeva;
 use RaiffCli\Helper\ContainerHelper;
 use Symfony\Component\Config\FileLocator;
@@ -25,5 +26,6 @@ $helperSet->set(new ContainerHelper($container));
 
 // Add commands.
 $application->add(new InLeva());
+$application->add(new AccountAdd());
 
 $application->run();
