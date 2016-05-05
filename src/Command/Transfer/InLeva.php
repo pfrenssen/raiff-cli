@@ -5,6 +5,7 @@ namespace RaiffCli\Command\Transfer;
 use Behat\Mink\Driver\Selenium2Driver;
 use Behat\Mink\Mink;
 use Behat\Mink\Session;
+use RaiffCli\Command\CommandBase;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\CssSelector\CssSelectorConverter;
