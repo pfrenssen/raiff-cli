@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use RaiffCli\Command\InLeva;
+use RaiffCli\Command\Transfer\InLeva;
 use RaiffCli\Helper\ContainerHelper;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Application;

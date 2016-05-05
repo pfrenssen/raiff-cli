@@ -1,6 +1,6 @@
 <?php
 
-namespace RaiffCli\Command;
+namespace RaiffCli\Command\Transfer;
 
 use Behat\Mink\Driver\Selenium2Driver;
 use Behat\Mink\Mink;
