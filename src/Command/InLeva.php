@@ -5,33 +5,26 @@ namespace RaiffCli\Command;
 use Behat\Mink\Driver\Selenium2Driver;
 use Behat\Mink\Mink;
 use Behat\Mink\Session;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\CssSelector\CssSelectorConverter;
 use Zumba\Mink\Driver\PhantomJSDriver;
 
 class InLeva extends CommandBase
 {
+
     protected function configure()
     {
         $this
             ->setName('transfer:in-leva')
-            ->setDescription('Do a bank transfer in leva.')
-            ->addArgument('account', InputArgument::REQUIRED, 'The account to use: either "individual" or "corporate"');
+            ->setDescription('Do a bank transfer in leva.');
+        $this->addAccountTypeArgument();
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
         // Ask for the account if this argument is omitted or invalid.
-        $account = $input->getArgument('account');
-        if (empty($account) || !in_array($account, ['individual', 'corporate'])) {
-            $helper = $this->getHelper('question');
-            $question = new ChoiceQuestion('Please select the account to use', array('individual', 'corporate'), 0);
-            $question->setErrorMessage('Account %s is invalid.');
-            $input->setArgument('account', $helper->ask($input, $output, $question));
-        }
+        $this->askAccountType($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

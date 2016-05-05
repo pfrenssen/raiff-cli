@@ -3,12 +3,41 @@
 namespace RaiffCli\Command;
 
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 
 /**
  * Base class for commands.
  */
 abstract class CommandBase extends Command
 {
+
+    /**
+     * Adds an argument to the command for the account type.
+     */
+    protected function addAccountTypeArgument() {
+        $this->addArgument('account-type', InputArgument::REQUIRED, 'The account type to use: either "individual" or "corporate"');
+    }
+
+    /**
+     * Asks the user for the account type.
+     *
+     * @param \Symfony\Component\Console\Input\InputInterface $input
+     *   The input interface.
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     *   The output interface.
+     */
+    protected function askAccountType (InputInterface $input, OutputInterface $output) {
+        $account = $input->getArgument('account-type');
+        if (empty($account) || !in_array($account, ['individual', 'corporate'])) {
+            $helper = $this->getHelper('question');
+            $question = new ChoiceQuestion('Please select the account type to use', array('individual', 'corporate'), 0);
+            $question->setErrorMessage('Account type %s is invalid.');
+            $input->setArgument('account-type', $helper->ask($input, $output, $question));
+        }
+    }
 
     /**
      * Returns the dependency injection container helper.
