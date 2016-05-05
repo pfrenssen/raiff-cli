@@ -2,9 +2,9 @@
 
 This project allows to do basic actions on the Bulgarian Raiffeissen Online
 banking software through the command line. I wrote this because I have RSI and
-cannot use a mouse, and it is practically impossible for me to use the website.
-It will also be useful for people that have a visual disability, or of you
-simply prefer to use the command line.
+cannot use a mouse, and it is very difficult for me to use the website. It will
+also be useful for people that have a visual disability, or of you simply
+prefer to use the command line.
 
 For the moment there is only support for creating basic transactions in leva.
 
@@ -39,14 +39,14 @@ mink:
 
 First you should set up your account names for your individual and corporate
 accounts with the 'account:add' command. Use the "short name" for the account,
-these look similar to '1234567890 BGN'.
+this looks similar to '1234567890 BGN'.
 
 ```
 $ ./raiffcli account:add
 ```
 
-Then you can do a transaction with the 'transfer:in-leva' command. It will ask
-you for the details.
+Then you can create a transaction with the 'transfer:in-leva' command. It will
+ask you for the details.
 
 ```
 $ ./raiffcli transfer:in-leva
