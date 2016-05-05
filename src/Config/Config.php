@@ -37,12 +37,12 @@ class Config
      * @param \Symfony\Component\Yaml\Parser $parser
      *   The Yaml parser.
      * @param string $filename
-     *   The name of the config file to parse.
+     *   The name of the config file to parse, without .yml extension.
      */
     public function __construct(Parser $parser, $filename)
     {
         $this->parser = $parser;
-        $this->path = __DIR__ . "/../../config/$filename";
+        $this->path = __DIR__ . "/../../config/$filename.yml";
 
         // The optional '.dist' file contains default values. Load this first,
         // then override the default values with the actual ones.
