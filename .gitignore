@@ -1,4 +1,5 @@
 .idea/
 config/account.yml
 config/config.yml
+config/recipients.yml
 vendor/
