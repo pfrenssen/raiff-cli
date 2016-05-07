@@ -17,7 +17,8 @@ abstract class CommandBase extends Command
     /**
      * Adds an argument to the command for the account type.
      */
-    protected function addAccountTypeArgument() {
+    protected function addAccountTypeArgument()
+    {
         $this->addArgument('account-type', InputArgument::REQUIRED, 'The account type to use: either "individual" or "corporate"');
     }
 
@@ -29,7 +30,8 @@ abstract class CommandBase extends Command
      * @param \Symfony\Component\Console\Output\OutputInterface $output
      *   The output interface.
      */
-    protected function askAccountType (InputInterface $input, OutputInterface $output) {
+    protected function askAccountType(InputInterface $input, OutputInterface $output)
+    {
         $account = $input->getArgument('account-type');
         if (empty($account) || !in_array($account, ['individual', 'corporate'])) {
             $helper = $this->getHelper('question');
@@ -51,7 +53,8 @@ abstract class CommandBase extends Command
      * @throws \InvalidArgumentException
      *   Thrown when the input is empty.
      */
-    public static function requiredValidator($input) {
+    public static function requiredValidator($input)
+    {
         if (empty(trim($input))) {
             throw new \InvalidArgumentException('Please enter a value.');
         }
@@ -77,7 +80,7 @@ abstract class CommandBase extends Command
      */
     protected function getConfigManager()
     {
-       return $this->getContainer()->get('config.manager');
+        return $this->getContainer()->get('config.manager');
     }
 
 }
