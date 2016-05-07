@@ -42,6 +42,44 @@ abstract class CommandBase extends Command
     }
 
     /**
+     * Adds an argument to the command for the account.
+     */
+    protected function addAccountArgument()
+    {
+        $this->addArgument('account', InputArgument::REQUIRED, 'The account to use');
+    }
+
+    /**
+     * Asks the user for the account.
+     *
+     * @param \Symfony\Component\Console\Input\InputInterface $input
+     *   The input interface.
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     *   The output interface.
+     * @param string $type
+     *   The account type, either 'individual' or 'corporate'.
+     */
+    protected function askAccount(InputInterface $input, OutputInterface $output, $type)
+    {
+        $config = $this->getConfigManager()->get('accounts');
+        $accounts = $config->get($type, []);
+
+        if (empty($accounts)) {
+            throw new \LogicException("There are no $type accounts. Please add one using the 'account:add' command.");
+        }
+
+        // If there is only one account, set it without asking questions.
+        if (count($accounts) == 1) {
+            $account = reset($accounts);
+            $input->setArgument('account', $account);
+        }
+        else {
+            // @todo Ask which account to use if there are multiple accounts.
+            throw new \Exception('Support for multiple accounts is not implemented yet.');
+        }
+    }
+
+    /**
      * Validator for required arguments.
      *
      * @param string $input

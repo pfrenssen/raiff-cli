@@ -20,12 +20,13 @@ class InLeva extends CommandBase
             ->setName('transfer:in-leva')
             ->setDescription('Do a bank transfer in leva.');
         $this->addAccountTypeArgument();
+        $this->addAccountArgument();
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        // Ask for the account if this argument is omitted or invalid.
         $this->askAccountType($input, $output);
+        $this->askAccount($input, $output, $input->getArgument('account-type'));
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
