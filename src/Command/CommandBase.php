@@ -35,7 +35,7 @@ abstract class CommandBase extends Command
         $account = $input->getArgument('account-type');
         if (empty($account) || !in_array($account, ['individual', 'corporate'])) {
             $helper = $this->getHelper('question');
-            $question = new ChoiceQuestion('Please select the account type to use', array('individual', 'corporate'), 0);
+            $question = new ChoiceQuestion('Please select the account type (default: individual):', array('individual', 'corporate'), 0);
             $question->setErrorMessage('Account type %s is invalid.');
             $input->setArgument('account-type', $helper->ask($input, $output, $question));
         }
