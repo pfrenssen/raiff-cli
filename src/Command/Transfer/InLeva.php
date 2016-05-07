@@ -13,9 +13,15 @@ use Symfony\Component\Console\Question\Question;
 use Symfony\Component\CssSelector\CssSelectorConverter;
 use Zumba\Mink\Driver\PhantomJSDriver;
 
+/**
+ * Console command to execute a transaction in leva.
+ */
 class InLeva extends CommandBase
 {
 
+    /**
+     * {@inheritdoc}
+     */
     protected function configure()
     {
         $this
@@ -26,6 +32,9 @@ class InLeva extends CommandBase
         $this->addArgument('transactions', InputArgument::REQUIRED, 'The transactions');
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function interact(InputInterface $input, OutputInterface $output)
     {
         $this->askAccountType($input, $output);
@@ -33,6 +42,9 @@ class InLeva extends CommandBase
         $this->askTransactions($input, $output);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $account_type = $input->getArgument('account-type');
