@@ -80,6 +80,65 @@ abstract class CommandBase extends Command
     }
 
     /**
+     * Asks for a recipient with an autocomplete field.
+     *
+     * @param \Symfony\Component\Console\Input\InputInterface $input
+     *   The input interface.
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     *   The output interface.
+     * @param bool $allow_empty
+     *   Whether or not an empty result is acceptable.
+     * @param string $type
+     *   The recipient type to return, either 'bulgaria' or 'foreign'. Leave
+     *   empty to choose between all recipients.
+     *
+     * @return array
+     *   The recipient array.
+     */
+    protected function askRecipient(InputInterface $input, OutputInterface $output, $allow_empty = false, $type = '') {
+        // Retrieve the recipients.
+        $config = $this->getConfigManager()->get('recipients');
+        $recipients = $config->get('recipients', []);
+
+        // Filter recipients by type.
+        switch ($type) {
+            case 'bulgaria':
+                $recipients = array_filter($recipients, function ($recipient) {
+                    return substr($recipient['iban'], 0, 2) === 'BG';
+                });
+                break;
+            case 'foreign':
+                $recipients = array_filter($recipients, function ($recipient) {
+                    return substr($recipient['iban'], 0, 2) !== 'BG';
+                });
+                break;
+            default:
+                // Do not filter.
+                break;
+        }
+
+        // Add an empty option.
+        $default = null;
+        if ($allow_empty) {
+            $default = '- skip -';
+            $recipients[]['alias'] = $default;
+        }
+
+        $helper = $this->getHelper('question');
+        $question = new ChoiceQuestion('Recipient:', array_column($recipients, 'alias'), $default);
+        $question->setErrorMessage('Recipient %s does not exist.');
+
+        $recipient = $helper->ask($input, $output, $question);
+
+        if ($recipient === $default) {
+            return [];
+        }
+
+        $recipients = array_combine(array_column($recipients, 'alias'), $recipients);
+        return $recipients[$recipient];
+    }
+
+    /**
      * Validator for required arguments.
      *
      * @param string $input
