@@ -35,7 +35,7 @@ class AccountAdd extends CommandBase
         $account_type = $input->getArgument('account-type');
 
         /** @var \RaiffCli\Config\Config $config */
-        $config = $this->getConfigManager()->get('account');
+        $config = $this->getConfigManager()->get('accounts');
         $accounts = $config->get($account_type, []);
         $accounts[] = $account;
         $config->set($account_type, $accounts);
