@@ -35,11 +35,11 @@ class InLeva extends CommandBase
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $config = $this->getConfigManager()->get('config');
+        $account_type = $input->getArgument('account-type');
         $account = $input->getArgument('account');
-        $output->writeln('Chosen account: ' . $account);
-        $output->writeln('Your username: ' . $config->get('credentials.username'));
+        $transactions = $input->getArgument('transactions');
 
+        $config = $this->getConfigManager()->get('config');
         $base_url = $config->get('base_url');
 
         $mink = new Mink();
@@ -68,9 +68,35 @@ class InLeva extends CommandBase
 
         // Choose between individual and corporate account.
         $this->waitUntilElementPresent($session, '#main .themebox.ind');
-        $selector = $account === 'individual' ? '#main .themebox.ind a.btn.secondary' : '#main .themebox.corp a.btn.secondary';
+        $selector = $account_type === 'individual' ? '#main .themebox.ind a.btn.secondary' : '#main .themebox.corp a.btn.secondary';
         $session->getPage()->find('css', $selector)->click();
-        sleep(5);
+        $this->waitUntilElementPresent($session, '#head a.logo');
+
+        // Start from the homepage.
+        $session->getPage()->find('css', '#head a.logo')->click();
+
+        foreach ($transactions as $transaction) {
+            // Open the "In leva" payment form.
+            $this->waitUntilElementPresent($session, '#NewPaymentTypes');
+            $session->getPage()->clickLink('In leva');
+
+            // Choose the account.
+            $this->waitUntilElementPresent($session, '#showPayerPicker');
+            $session->getPage()->findById('showPayerPicker')->click();
+            $this->waitUntilElementPresent($session, '#accounts');
+            $session->getPage()->find('xpath', '//*[@id="accounts"]/table//tr/td[text()[contains(., "' . $account . '")]]')->click();
+
+            // Fill in the fields.
+            $this->waitUntilElementPresent($session, '#Document_PayeeName');
+            $session->getPage()->fillField('Document_PayeeName', $transaction['recipient']['name']);
+            $session->getPage()->fillField('Document_PayeeIBAN', $transaction['recipient']['iban']);
+            $session->getPage()->fillField('Document_Amount', $transaction['amount']);
+            $session->getPage()->fillField('Document_Description1', $transaction['description']);
+
+            // Submit the form.
+            $session->getPage()->findById('btnSave')->click();
+            $this->waitUntilElementPresent($session, '#SaveOKResultHolder');
+        }
     }
 
     protected function waitUntilElementPresent(Session $session, $selector) {
