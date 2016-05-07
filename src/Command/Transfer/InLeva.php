@@ -40,7 +40,10 @@ class InLeva extends CommandBase
     protected function interact(InputInterface $input, OutputInterface $output)
     {
         $this->askAccountType($input, $output);
-        $this->askAccount($input, $output, $input->getArgument('account-type'));
+        $account_type = $input->getArgument('account-type');
+        $output->writeln("<info>Selected account type: $account_type</info>");
+
+        $this->askAccount($input, $output, $account_type);
         $this->askTransactions($input, $output);
         $this->askConfirmation($input, $output, $input->getArgument('transactions'));
     }
@@ -184,6 +187,7 @@ class InLeva extends CommandBase
                 'amount' => $amount,
                 'description' => $description,
             ];
+            $output->writeln("<info>Added transaction to ${recipient['name']} for $amount BGN: '$description'</info>");
         }
 
         $input->setArgument('transactions', $transactions);
