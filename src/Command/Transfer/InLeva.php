@@ -26,10 +26,10 @@ class InLeva extends CommandBase
     {
         $this
             ->setName('transfer:in-leva')
-            ->setDescription('Do a bank transfer in leva.');
-        $this->addAccountTypeArgument();
-        $this->addAccountArgument();
-        $this->addArgument('transactions', InputArgument::REQUIRED, 'The transactions');
+            ->setDescription('Do a bank transfer in leva.')
+            ->addAccountTypeArgument()
+            ->addAccountArgument()
+            ->addArgument('transactions', InputArgument::REQUIRED, 'The transactions');
     }
 
     /**

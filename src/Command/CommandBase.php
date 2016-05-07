@@ -16,10 +16,14 @@ abstract class CommandBase extends Command
 
     /**
      * Adds an argument to the command for the account type.
+     *
+     * @return $this
      */
     protected function addAccountTypeArgument()
     {
         $this->addArgument('account-type', InputArgument::REQUIRED, 'The account type to use: either "individual" or "corporate"');
+
+        return $this;
     }
 
     /**
@@ -43,10 +47,14 @@ abstract class CommandBase extends Command
 
     /**
      * Adds an argument to the command for the account.
+     *
+     * @return $this
      */
     protected function addAccountArgument()
     {
         $this->addArgument('account', InputArgument::REQUIRED, 'The account to use');
+
+        return $this;
     }
 
     /**
