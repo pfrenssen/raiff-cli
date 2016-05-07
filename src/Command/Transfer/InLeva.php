@@ -6,9 +6,11 @@ use Behat\Mink\Driver\Selenium2Driver;
 use Behat\Mink\Mink;
 use Behat\Mink\Session;
 use RaiffCli\Command\CommandBase;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\CssSelector\CssSelectorConverter;
 use Zumba\Mink\Driver\PhantomJSDriver;
@@ -40,6 +42,7 @@ class InLeva extends CommandBase
         $this->askAccountType($input, $output);
         $this->askAccount($input, $output, $input->getArgument('account-type'));
         $this->askTransactions($input, $output);
+        $this->askConfirmation($input, $output, $input->getArgument('transactions'));
     }
 
     /**
@@ -186,4 +189,41 @@ class InLeva extends CommandBase
         $input->setArgument('transactions', $transactions);
     }
 
+    /**
+     * Asks the user for confirmation before executing the transactions.
+     *
+     * @param \Symfony\Component\Console\Input\InputInterface $input
+     *   The input interface.
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     *   The output interface.
+     * @param array $transactions
+     *   The transactions ready to be executed.
+     *
+     * @throws \Exception
+     *   Thrown when confirmation is not given.
+     */
+    protected function askConfirmation(InputInterface $input, OutputInterface $output, array $transactions) {
+        // Show a table of transactions:
+        $output->writeln('Transactions:');
+        $table = new Table($output);
+        $table->setHeaders(['Name', 'Amount', 'Description']);
+        $table->setStyle('compact');
+
+        foreach ($transactions as $transaction) {
+            $table->addRow([
+                $transaction['recipient']['name'],
+                $transaction['amount'],
+                $transaction['description'],
+            ]);
+        }
+        $table->render();
+
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion('Are you sure you want to execute these transactions (Y/n)? ', true);
+        $confirmation = $helper->ask($input, $output, $question);
+
+        if (!$confirmation) {
+            throw new \Exception('Transfer aborted.');
+        }
+    }
 }
