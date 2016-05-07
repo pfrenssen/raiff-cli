@@ -139,7 +139,7 @@ class InLeva extends CommandBase
      * @param \Symfony\Component\Console\Output\OutputInterface $output
      *   The output interface.
      */
-    protected function askTransactions (InputInterface $input, OutputInterface $output) {
+    protected function askTransactions(InputInterface $input, OutputInterface $output) {
         $transactions = [];
 
         $helper = $this->getHelper('question');
