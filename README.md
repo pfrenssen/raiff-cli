@@ -45,6 +45,12 @@ this looks similar to '1234567890 BGN'.
 $ ./raiffcli account:add
 ```
 
+Add some recipients. Recipients consist of a name, IBAN and a unique alias.
+
+```
+$ ./raiffcli recipient:add
+```
+
 Then you can create a transaction with the 'transfer:in-leva' command. It will
 ask you for the details.
 
