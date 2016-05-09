@@ -114,6 +114,9 @@ class InLeva extends CommandBase
             // Submit the form.
             $session->getPage()->findById('btnSave')->click();
             $this->waitUntilElementPresent($session, '#SaveOKResultHolder');
+
+            // Provide feedback about the progress.
+            $output->writeln("<info>Registered transaction to ${transaction['recipient']['name']} for ${transaction['amount']} BGN: '${transaction['description']}</info>");
         }
     }
 
