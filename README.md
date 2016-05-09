@@ -18,7 +18,7 @@ This requires PHP 5.6 or higher, and either Selenium 2 or PhantomJS.
 Running Selenium 2:
 
 ```
-$ java -jar selenium-server-standalone.jar  2>&1 >> /dev/null &
+$ java -jar selenium-server-standalone.jar 2>&1 >> /dev/null &
 ```
 
 Running PhantomJS:
