@@ -213,7 +213,7 @@ class InLeva extends CommandBase
         // Show a table of transactions:
         $output->writeln('Transactions:');
         $table = new Table($output);
-        $table->setHeaders(['Name', 'Amount', 'Description']);
+        $table->setHeaders(['Recipient', 'Amount', 'Description']);
         $table->setStyle('compact');
 
         foreach ($transactions as $transaction) {
