@@ -15,6 +15,18 @@ user clicking through the website.
 
 This requires PHP 5.6 or higher, and either Selenium 2 or PhantomJS.
 
+Running Selenium 2:
+
+```
+$ java -jar selenium-server-standalone.jar  2>&1 >> /dev/null &
+```
+
+Running PhantomJS:
+
+```
+$ phantomjs --ssl-protocol=any --ignore-ssl-errors=true ./vendor/jcalderonzumba/gastonjs/src/Client/main.js 8510 1024 768 2>&1 >> /dev/null &
+```
+
 ## Installation
 
 First install the dependencies:
