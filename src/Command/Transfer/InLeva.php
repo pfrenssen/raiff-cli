@@ -116,7 +116,7 @@ class InLeva extends CommandBase
             $this->waitUntilElementPresent($session, '#SaveOKResultHolder');
 
             // Provide feedback about the progress.
-            $output->writeln("<info>Registered transaction to {$transaction['recipient']['name']} for {$transaction['amount']} BGN: '{$transaction['description']}</info>");
+            $output->writeln("<info>Registered transaction to {$transaction['recipient']['name']} for {$transaction['amount']} BGN: '{$transaction['description']}'</info>");
         }
     }
 
