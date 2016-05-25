@@ -28,6 +28,8 @@ class InLeva extends TransferBase
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->session = $this->getSession();
+
         $account_type = $input->getArgument('account-type');
         $account = $input->getArgument('account');
         $transactions = $input->getArgument('transactions');

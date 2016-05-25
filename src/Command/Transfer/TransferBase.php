@@ -28,6 +28,13 @@ abstract class TransferBase extends CommandBase
     protected $config;
 
     /**
+     * The Mink session manager.
+     *
+     * @var \Behat\Mink\Mink
+     */
+    protected $mink;
+
+    /**
      * The Mink session.
      *
      * @var \Behat\Mink\Session
@@ -50,9 +57,6 @@ abstract class TransferBase extends CommandBase
      */
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->config = $this->getConfigManager()->get('config');
-        $this->registerSession();
-
         $this->askAccountType($input, $output);
         $account_type = $input->getArgument('account-type');
         $output->writeln("<info>Selected account type: $account_type</info>");
@@ -198,24 +202,47 @@ abstract class TransferBase extends CommandBase
     }
 
     /**
-     * Initializes the Mink session.
+     * Initializes Mink.
      */
-    protected function registerSession() {
+    protected function initMink()
+    {
         $mink = new Mink();
+        $config = $this->getConfigManager()->get('config');
 
         // Register PhantomJS driver.
-        $host = $this->config->get('mink.sessions.phantomjs.host');
-        $template_cache = $this->config->get('mink.sessions.phantomjs.template_cache');
+        $host = $config->get('mink.sessions.phantomjs.host');
+        $template_cache = $config->get('mink.sessions.phantomjs.template_cache');
         if (!file_exists($template_cache)) mkdir($template_cache);
         $mink->registerSession('phantomjs', new Session(new PhantomJSDriver($host, $template_cache)));
 
         // Register Selenium driver.
-        $browser = $this->config->get('mink.sessions.selenium2.browser');
-        $host = $this->config->get('mink.sessions.selenium2.host');
+        $browser = $config->get('mink.sessions.selenium2.browser');
+        $host = $config->get('mink.sessions.selenium2.host');
         $mink->registerSession('selenium2', new Session(new Selenium2Driver($browser, NULL, $host)));
 
-        $mink->setDefaultSessionName($this->config->get('mink.default_session'));
-        $this->session = $mink->getSession();
+        $mink->setDefaultSessionName($config->get('mink.default_session'));
+        return $mink;
+    }
+
+    /**
+     * @return Mink
+     *   The Mink session manager.
+     */
+    protected function getMink()
+    {
+        if (empty($this->mink)) {
+            $this->mink = $this->initMink();
+        }
+        return $this->mink;
+    }
+
+    /**
+     * @return Session
+     *   The Mink session.
+     */
+    protected function getSession()
+    {
+        return $this->getMink()->getSession();
     }
 
     /**
@@ -231,11 +258,13 @@ abstract class TransferBase extends CommandBase
     /**
      * Logs in.
      */
-    protected function logIn() {
-        $base_url = $this->config->get('base_url');
+    protected function logIn()
+    {
+        $config = $this->getConfigManager()->get('config');
+        $base_url = $config->get('base_url');
         $this->session->visit($base_url);
-        $this->session->getPage()->fillField('userName', $this->config->get('credentials.username'));
-        $this->session->getPage()->fillField('pwd', $this->config->get('credentials.password'));
+        $this->session->getPage()->fillField('userName', $config->get('credentials.username'));
+        $this->session->getPage()->fillField('pwd', $config->get('credentials.password'));
         $this->session->getPage()->find('css', '#m_ctrl_Page button.primary')->click();
         $this->waitUntilElementPresent('#main .themebox.ind');
     }
