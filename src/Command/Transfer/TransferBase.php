@@ -58,7 +58,7 @@ abstract class TransferBase extends CommandBase
         $output->writeln("<info>Selected account type: $account_type</info>");
 
         $this->askAccount($input, $output, $account_type);
-        $this->askTransactions($input, $output);
+        $this->askTransactions($input, $output, $this->getRecipientNationality());
         $this->askConfirmation($input, $output, $input->getArgument('transactions'));
     }
 
@@ -93,15 +93,18 @@ abstract class TransferBase extends CommandBase
      *   The input interface.
      * @param \Symfony\Component\Console\Output\OutputInterface $output
      *   The output interface.
+     * @param string $nationality
+     *   Optionally limit the beneficiary accounts for the transactions by
+     *   nationality. Supported values are 'bulgaria' and 'foreign'.
      */
-    protected function askTransactions(InputInterface $input, OutputInterface $output)
+    protected function askTransactions(InputInterface $input, OutputInterface $output, $nationality = '')
     {
         $transactions = [];
 
         $helper = $this->getHelper('question');
         while (true) {
             // Ask recipient, limited to Bulgarian accounts.
-            $recipient = $this->askRecipient($input, $output, true, 'bulgaria');
+            $recipient = $this->askRecipient($input, $output, true, $nationality);
 
             // If the recipient is omitted, start the transactions.
             if (empty($recipient)) {
@@ -255,4 +258,16 @@ abstract class TransferBase extends CommandBase
         $this->waitUntilElementPresent('#accounts');
         $this->session->getPage()->find('xpath', '//*[@id="accounts"]/table//tr/td[text()[contains(., "' . $account . '")]]')->click();
     }
+
+    /**
+     * Sets the nationality of the recipients for the current transaction type.
+     *
+     * @return string
+     *   Can be either 'bulgaria' or 'foreign'. Leave empty to allow recipients
+     *   of all nationalities.
+     */
+    protected function getRecipientNationality() {
+        return '';
+    }
+
 }

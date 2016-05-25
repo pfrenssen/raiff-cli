@@ -65,4 +65,11 @@ class InLeva extends TransferBase
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    protected function getRecipientNationality() {
+        return 'bulgaria';
+    }
+
 }
