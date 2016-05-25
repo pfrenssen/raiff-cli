@@ -120,8 +120,9 @@ abstract class TransferBase extends CommandBase
                 break;
             }
 
-            // Ask amount in BGN.
-            $question = new Question('Amount in BGN: ');
+            // Ask amount.
+            $currency = $nationality === 'bulgaria' ? 'BGN' : 'EUR';
+            $question = new Question("Amount in $currency: ");
             $question->setValidator(function ($input) {
                 if (!empty($input) && preg_match("/^[0-9]+\.[0-9]{2}$/", $input) !== 1) {
                     throw new \InvalidArgumentException('The amount must be in the format "123.45".');
