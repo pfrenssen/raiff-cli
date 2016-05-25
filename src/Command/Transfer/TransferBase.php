@@ -248,7 +248,8 @@ abstract class TransferBase extends CommandBase
     /**
      * Visits the homepage.
      */
-    protected function navigateToHomepage() {
+    protected function navigateToHomepage()
+    {
         // Navigate to the homepage by clicking on the logo. We cannot visit the
         // URL directly because we would lose session information passed by
         // query arguments.
@@ -275,7 +276,8 @@ abstract class TransferBase extends CommandBase
      * @param string $account_type
      *   The account type, either 'individual' or 'corporate'.
      */
-    protected function selectAccountType($account_type) {
+    protected function selectAccountType($account_type)
+    {
         $selector = $account_type === 'individual' ? '#main .themebox.ind a.btn.secondary' : '#main .themebox.corp a.btn.secondary';
         $this->session->getPage()->find('css', $selector)->click();
         $this->waitUntilElementPresent('#head a.logo');
@@ -287,7 +289,8 @@ abstract class TransferBase extends CommandBase
      * @param string $account
      *   The account name, in the format '1234567890 BGN'.
      */
-    protected function chooseAccount($account) {
+    protected function chooseAccount($account)
+    {
         $this->waitUntilElementPresent('#showPayerPicker');
         $this->session->getPage()->findById('showPayerPicker')->click();
         $this->waitUntilElementPresent('#accounts');
@@ -301,7 +304,8 @@ abstract class TransferBase extends CommandBase
      *   Can be either 'bulgaria' or 'foreign'. Leave empty to allow recipients
      *   of all nationalities.
      */
-    protected function getRecipientNationality() {
+    protected function getRecipientNationality()
+    {
         return '';
     }
 
