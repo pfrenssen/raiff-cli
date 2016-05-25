@@ -62,13 +62,22 @@ abstract class TransferBase extends CommandBase
         $this->askConfirmation($input, $output, $input->getArgument('transactions'));
     }
 
-    protected function waitUntilElementPresent(Session $session, $selector)
+    /**
+     * Waits for the element with the given selector to appear.
+     *
+     * @param string $selector
+     *   The CSS selector identifying the element.
+     *
+     * @throws \Exception
+     *   Thrown when the element doesn't appear within 10 seconds.
+     */
+    protected function waitUntilElementPresent($selector)
     {
-        $timeout = 10000000;
+        $timeout = 20000000;
         $converter = new CssSelectorConverter();
 
         do {
-            $elements = $session->getDriver()->find($converter->toXPath($selector));
+            $elements = $this->session->getDriver()->find($converter->toXPath($selector));
             if (!empty($elements)) return;
             usleep(500000);
             $timeout -= 500000;
@@ -200,4 +209,50 @@ abstract class TransferBase extends CommandBase
         $this->session = $mink->getSession();
     }
 
+    /**
+     * Visits the homepage.
+     */
+    protected function navigateToHomepage() {
+        // Navigate to the homepage by clicking on the logo. We cannot visit the
+        // URL directly because we would lose session information passed by
+        // query arguments.
+        $this->session->getPage()->find('css', '#head a.logo')->click();
+    }
+
+    /**
+     * Logs in.
+     */
+    protected function logIn() {
+        $base_url = $this->config->get('base_url');
+        $this->session->visit($base_url);
+        $this->session->getPage()->fillField('userName', $this->config->get('credentials.username'));
+        $this->session->getPage()->fillField('pwd', $this->config->get('credentials.password'));
+        $this->session->getPage()->find('css', '#m_ctrl_Page button.primary')->click();
+        $this->waitUntilElementPresent('#main .themebox.ind');
+    }
+
+    /**
+     * Selects the account type.
+     *
+     * @param string $account_type
+     *   The account type, either 'individual' or 'corporate'.
+     */
+    protected function selectAccountType($account_type) {
+        $selector = $account_type === 'individual' ? '#main .themebox.ind a.btn.secondary' : '#main .themebox.corp a.btn.secondary';
+        $this->session->getPage()->find('css', $selector)->click();
+        $this->waitUntilElementPresent('#head a.logo');
+    }
+
+    /**
+     * Chooses the "Sender" account.
+     *
+     * @param string $account
+     *   The account name, in the format '1234567890 BGN'.
+     */
+    protected function chooseAccount($account) {
+        $this->waitUntilElementPresent('#showPayerPicker');
+        $this->session->getPage()->findById('showPayerPicker')->click();
+        $this->waitUntilElementPresent('#accounts');
+        $this->session->getPage()->find('xpath', '//*[@id="accounts"]/table//tr/td[text()[contains(., "' . $account . '")]]')->click();
+    }
 }
