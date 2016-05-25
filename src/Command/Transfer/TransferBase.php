@@ -67,17 +67,22 @@ abstract class TransferBase extends CommandBase
      *
      * @param string $selector
      *   The CSS selector identifying the element.
+     * @param string $engine
+     *   The selector engine name, either 'css' or 'xpath'. Defaults to 'css'.
      *
      * @throws \Exception
      *   Thrown when the element doesn't appear within 10 seconds.
      */
-    protected function waitUntilElementPresent($selector)
+    protected function waitUntilElementPresent($selector, $engine = 'css')
     {
         $timeout = 20000000;
-        $converter = new CssSelectorConverter();
+        if ($engine === 'css') {
+            $converter = new CssSelectorConverter();
+            $selector = $converter->toXPath($selector);
+        }
 
         do {
-            $elements = $this->session->getDriver()->find($converter->toXPath($selector));
+            $elements = $this->session->getDriver()->find($selector);
             if (!empty($elements)) return;
             usleep(500000);
             $timeout -= 500000;
