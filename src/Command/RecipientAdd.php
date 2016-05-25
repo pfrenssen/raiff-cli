@@ -19,9 +19,12 @@ class RecipientAdd extends CommandBase
         $this
             ->setName('recipient:add')
             ->setDescription('Add a recipient.')
+            ->addArgument('alias', InputArgument::REQUIRED, 'An alias to identify this recipient')
             ->addArgument('name', InputArgument::REQUIRED, 'The name of the recipient')
             ->addArgument('iban', InputArgument::REQUIRED, 'The IBAN of the recipient.')
-            ->addArgument('alias', InputArgument::REQUIRED, 'An alias to identify this recipient');
+            ->addArgument('bic', InputArgument::OPTIONAL, 'The BIC of the recipient')
+            ->addArgument('address', InputArgument::OPTIONAL, 'The address of the recipient')
+        ;
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
@@ -42,7 +45,26 @@ class RecipientAdd extends CommandBase
             $question->setValidator([$this, 'validateIban']);
             $input->setArgument('iban', $helper->ask($input, $output, $question));
         }
-        
+
+        // If the recipient is located outside of Bulgaria, we need some more
+        // information.
+        if (strtolower(substr($input->getArgument('iban'), 0, 2)) !== 'bg') {
+            // Ask for the BIC.
+            if (empty($bic)) {
+                $helper = $this->getHelper('question');
+                $question = new Question('BIC: ');
+                $question->setValidator([$this, 'requiredValidator']);
+                $input->setArgument('bic', $helper->ask($input, $output, $question));
+            }
+            // Ask for the address.
+            if (empty($address)) {
+                $helper = $this->getHelper('question');
+                $question = new Question('Recipient address: ');
+                $question->setValidator([$this, 'requiredValidator']);
+                $input->setArgument('address', $helper->ask($input, $output, $question));
+            }
+        }
+
         // Ask for the alias.
         if (empty($alias)) {
             $helper = $this->getHelper('question');
@@ -58,10 +80,18 @@ class RecipientAdd extends CommandBase
         $iban = $input->getArgument('iban');
         $alias = $input->getArgument('alias');
 
+        $recipient = ['alias' => $alias, 'name' => $name, 'iban' => $iban];
+
+        foreach (['bic', 'address'] as $optional_argument) {
+            if ($value = $input->getArgument($optional_argument)) {
+                $recipient[$optional_argument] = $value;
+            }
+        }
+
         /** @var \RaiffCli\Config\Config $config */
         $config = $this->getConfigManager()->get('recipients');
         $recipients = $config->get('recipients', []);
-        $recipients[] = ['alias' => $alias, 'name' => $name, 'iban' => $iban];
+        $recipients[] = $recipient;
 
         usort($recipients, function ($a, $b) {
             return strcmp($a['alias'], $b['alias']);
