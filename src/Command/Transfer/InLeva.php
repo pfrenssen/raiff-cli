@@ -31,7 +31,6 @@ class InLeva extends TransferBase
         $account_type = $input->getArgument('account-type');
         $account = $input->getArgument('account');
         $transactions = $input->getArgument('transactions');
-        $session = $this->session;
 
         // Log in.
         $this->logIn();
@@ -45,20 +44,20 @@ class InLeva extends TransferBase
         foreach ($transactions as $transaction) {
             // Open the "In leva" payment form.
             $this->waitUntilElementPresent('#NewPaymentTypes');
-            $session->getPage()->clickLink('In leva');
+            $this->session->getPage()->clickLink('In leva');
 
             // Choose the account.
             $this->chooseAccount($account);
 
             // Fill in the fields.
             $this->waitUntilElementPresent('#Document_PayeeName');
-            $session->getPage()->fillField('Document_PayeeName', $transaction['recipient']['name']);
-            $session->getPage()->fillField('Document_PayeeIBAN', $transaction['recipient']['iban']);
-            $session->getPage()->fillField('Document_Amount', $transaction['amount']);
-            $session->getPage()->fillField('Document_Description1', $transaction['description']);
+            $this->session->getPage()->fillField('Document_PayeeName', $transaction['recipient']['name']);
+            $this->session->getPage()->fillField('Document_PayeeIBAN', $transaction['recipient']['iban']);
+            $this->session->getPage()->fillField('Document_Amount', $transaction['amount']);
+            $this->session->getPage()->fillField('Document_Description1', $transaction['description']);
 
             // Submit the form.
-            $session->getPage()->findById('btnSave')->click();
+            $this->session->getPage()->findById('btnSave')->click();
             $this->waitUntilElementPresent('#SaveOKResultHolder');
 
             // Provide feedback about the progress.
