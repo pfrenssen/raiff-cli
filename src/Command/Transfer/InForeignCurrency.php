@@ -86,7 +86,6 @@ class InForeignCurrency extends TransferBase
             $this->session->getPage()->find('xpath', '//div[@aria-labelledby="ui-dialog-title-1"]/div/div/button')->click();
 
             // Submit the form.
-            sleep(10);
             $this->session->getPage()->findById('btnSave')->click();
             $this->waitUntilElementPresent('#SaveOKResultHolder');
 
