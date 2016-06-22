@@ -79,7 +79,7 @@ abstract class TransferBase extends CommandBase
      */
     protected function waitUntilElementPresent($selector, $engine = 'css')
     {
-        $timeout = 60000000;
+        $timeout = 20000000;
         if ($engine === 'css') {
             $converter = new CssSelectorConverter();
             $selector = $converter->toXPath($selector);
