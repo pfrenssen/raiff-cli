@@ -105,6 +105,8 @@ class Config
      *   The configuration key. Separate hierarchical keys with a period.
      * @param mixed $value
      *   The value to set.
+     *
+     * @return $this
      */
     public function set($key, $value)
     {
@@ -117,6 +119,8 @@ class Config
             $config = &$config[$key];
         }
         $config = $value;
+
+        return $this;
     }
 
     /**

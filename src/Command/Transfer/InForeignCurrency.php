@@ -85,6 +85,9 @@ class InForeignCurrency extends TransferBase
             $this->session->getPage()->findById('btnSave')->click();
             $this->waitUntilElementPresent('#SaveOKResultHolder');
 
+            // The transaction succeeded. Remove it from the disk cache.
+            $this->deleteStoredTransaction($transaction);
+
             // Provide feedback about the progress.
             $output->writeln("<info>Registered transaction to {$transaction['recipient']['name']} for {$transaction['amount']} BGN: '{$transaction['description']}'</info>");
         }

@@ -108,7 +108,24 @@ abstract class TransferBase extends CommandBase
      */
     protected function askTransactions(InputInterface $input, OutputInterface $output, $nationality = '')
     {
-        $transactions = [];
+        // Retrieve any transactions that were entered during a previous session
+        // but were not successfully executed.
+        $transactions = $this->getStoredTransactions($input->getArgument('account-type'));
+
+        // If there are any transactions remaining from a previous session,
+        // ask if the user wants to include them.
+        if (!empty($transactions)) {
+            $output->writeln("<info>Transactions from the previous session are present:</info>");
+            $this->outputTransactionTable($output, $transactions);
+
+            $helper = $this->getHelper('question');
+            $question = new ConfirmationQuestion('Do you want to import these transactions (Y/n)? ', true);
+            $confirmation = $helper->ask($input, $output, $question);
+
+            if (!$confirmation) {
+                $transactions = [];
+            }
+        }
 
         $helper = $this->getHelper('question');
         while (true) {
@@ -177,20 +194,8 @@ abstract class TransferBase extends CommandBase
      */
     protected function askConfirmation(InputInterface $input, OutputInterface $output, array $transactions)
     {
-        // Show a table of transactions:
-        $output->writeln('Transactions:');
-        $table = new Table($output);
-        $table->setHeaders(['Recipient', 'Amount', 'Description']);
-        $table->setStyle('compact');
-
-        foreach ($transactions as $transaction) {
-            $table->addRow([
-                $transaction['recipient']['name'],
-                $transaction['amount'],
-                $transaction['description'],
-            ]);
-        }
-        $table->render();
+        // Show a table of transactions.
+        $this->outputTransactionTable($output, $transactions);
 
         $helper = $this->getHelper('question');
         $question = new ConfirmationQuestion('Are you sure you want to execute these transactions (Y/n)? ', true);
@@ -199,6 +204,84 @@ abstract class TransferBase extends CommandBase
         if (!$confirmation) {
             throw new \Exception('Transfer aborted.');
         }
+
+        // Store the transactions to disk so they can be reused if they cannot
+        // be executed.
+        $this->storeTransactions($transactions, $input->getArgument('account-type'));
+    }
+
+    /**
+     * Outputs a table containing the given transactions to the console.
+     *
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     *   The console output handler.
+     * @param array $transactions
+     *   The array of transactions to output.
+     */
+    protected function outputTransactionTable(OutputInterface $output, array $transactions) {
+        $output->writeln('Transactions:');
+        $table = new Table($output);
+        $table->setHeaders(['Recipient', 'Amount', 'Description']);
+        $table->setStyle('compact');
+
+        foreach ($transactions as $transaction) {
+            $table->addRow([
+              $transaction['recipient']['name'],
+              $transaction['amount'],
+              $transaction['description'],
+            ]);
+        }
+        $table->render();
+    }
+
+    /**
+     * Returns transactions that were stored during a previous session.
+     *
+     * @param string $account_type
+     *   The account type for which to return the transactions.
+     *
+     * @return array
+     *   The transactions.
+     */
+    protected function getStoredTransactions($account_type) {
+        $config = $this->getConfigManager()->get('transactions');
+        $transactions = $config->get($this->getName(), []);
+        return !empty($transactions[$account_type]) ? $transactions[$account_type] : [];
+    }
+
+    /**
+     * Stores the given transactions to disk.
+     *
+     * @param array $transactions
+     *   The transactions to store.
+     * @param string $account_type
+     *   The account type for which this transaction has been entered.
+     */
+    protected function storeTransactions(array $transactions, $account_type) {
+        $config = $this->getConfigManager()->get('transactions');
+        $stored_transactions = $config->get($this->getName());
+        $stored_transactions[$account_type] = $transactions;
+        $config->set($this->getName(), $stored_transactions)->save();
+    }
+
+    /**
+     * Deletes the given transaction from the disk cache.
+     *
+     * @param array $transaction
+     *   The transaction to delete.
+     */
+    protected function deleteStoredTransaction(array $transaction) {
+        $config = $this->getConfigManager()->get('transactions');
+        $data = $config->get($this->getName(), []);
+        foreach ($data as $account_type => $transactions) {
+            foreach ($transactions as $key => $stored_transaction) {
+                if ($stored_transaction === $transaction) {
+                    unset($data[$account_type][$key]);
+                    break;
+                }
+            }
+        }
+        $config->set($this->getName(), $data)->save();
     }
 
     /**
