@@ -2,12 +2,8 @@
 
 namespace RaiffCli\Command\Transfer;
 
-use Behat\Mink\Driver\Selenium2Driver;
-use Behat\Mink\Session;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Behat\Mink\Mink;
-use Zumba\Mink\Driver\PhantomJSDriver;
 
 /**
  * Console command to execute a transaction in foreign currency.
