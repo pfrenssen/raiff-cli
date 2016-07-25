@@ -59,6 +59,7 @@ class InLeva extends TransferBase
             $this->session->getPage()->fillField('Document_Description1', $transaction['description']);
 
             // Submit the form.
+            sleep(1);
             $this->session->getPage()->findById('btnSave')->click();
             $this->waitUntilElementPresent('#SaveOKResultHolder');
 
