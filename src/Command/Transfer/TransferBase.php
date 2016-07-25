@@ -198,7 +198,7 @@ abstract class TransferBase extends CommandBase
         $this->outputTransactionTable($output, $transactions);
 
         $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion('Are you sure you want to execute these transactions (Y/n)? ', true);
+        $question = new ConfirmationQuestion('Are you sure you want to register these transactions (Y/n)? ', true);
         $confirmation = $helper->ask($input, $output, $question);
 
         if (!$confirmation) {
