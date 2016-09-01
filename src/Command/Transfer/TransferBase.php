@@ -173,7 +173,7 @@ abstract class TransferBase extends CommandBase
                 'amount' => $amount,
                 'description' => $description,
             ];
-            $output->writeln("<info>Added transaction to {$recipient['name']} for $amount BGN: '$description'</info>");
+            $output->writeln("<info>Added transaction to {$recipient['name']} for $amount $currency: '$description'</info>");
         }
 
         $input->setArgument('transactions', $transactions);

@@ -90,7 +90,7 @@ class InForeignCurrency extends TransferBase
             $this->deleteStoredTransaction($transaction);
 
             // Provide feedback about the progress.
-            $output->writeln("<info>Registered transaction to {$transaction['recipient']['name']} for {$transaction['amount']} BGN: '{$transaction['description']}'</info>");
+            $output->writeln("<info>Registered transaction to {$transaction['recipient']['name']} for {$transaction['amount']} EUR: '{$transaction['description']}'</info>");
         }
     }
 
