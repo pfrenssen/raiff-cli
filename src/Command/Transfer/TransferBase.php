@@ -364,6 +364,18 @@ abstract class TransferBase extends CommandBase
         $selector = $account_type === 'individual' ? '#main .themebox.ind a.btn.secondary' : '#main .themebox.corp a.btn.secondary';
         $this->session->getPage()->find('css', $selector)->click();
         $this->waitUntilElementPresent('#head a.logo');
+        // Close the marketing banner if it is present.
+        $this->closeCampaignContent();
+    }
+
+    /**
+     * Closes the marketing campaign dialog if it is present.
+     */
+    protected function closeCampaignContent() {
+        $page = $this->session->getPage();
+        if ($page->find('css', '#CampaignContent')) {
+            $page->find('css', 'a.ui-dialog-titlebar-close')->click();
+        }
     }
 
     /**
