@@ -266,17 +266,20 @@ abstract class CommandBase extends Command
     }
 
     /**
-     * Waits for the element with the given selector to appear.
+     * Waits for the given element to appear or disappear from the DOM.
      *
      * @param string $selector
      *   The CSS selector identifying the element.
      * @param string $engine
      *   The selector engine name, either 'css' or 'xpath'. Defaults to 'css'.
+     * @param bool $present
+     *   TRUE to wait for the element to appear, FALSE for it to disappear.
+     *   Defaults to TRUE.
      *
      * @throws \Exception
-     *   Thrown when the element doesn't appear within 10 seconds.
+     *   Thrown when the element doesn't appear or disappear within 20 seconds.
      */
-    protected function waitUntilElementPresent($selector, $engine = 'css')
+    protected function waitForElementPresence($selector, $engine = 'css', $present = TRUE)
     {
         $timeout = 20000000;
         if ($engine === 'css') {
@@ -285,13 +288,45 @@ abstract class CommandBase extends Command
         }
 
         do {
-            $elements = $this->session->getDriver()->find($selector);
-            if (!empty($elements)) return;
+            $element = $this->session->getDriver()->find($selector);
+            if (!empty($element) === $present) return;
             usleep(500000);
             $timeout -= 500000;
         } while ($timeout > 0);
 
-        throw new \Exception("The element with selector '$selector' is not present on the page.");
+        throw new \Exception("The element with selector '$selector' is " . ($present ? 'not ' : '') . 'present on the page.');
+    }
+
+    /**
+     * Waits for the given element to become (in)visible.
+     *
+     * @param string $selector
+     *   The CSS selector identifying the element.
+     * @param string $engine
+     *   The selector engine name, either 'css' or 'xpath'. Defaults to 'css'.
+     * @param bool $visible
+     *   TRUE to wait for the element to become visible, FALSE for it to become
+     *   invisible. Defaults to TRUE.
+     *
+     * @throws \Exception
+     *   Thrown when the element doesn't become (in)visible within 20 seconds.
+     */
+    protected function waitForElementVisibility($selector, $engine = 'css', $visible = TRUE)
+    {
+        $timeout = 20000000;
+        if ($engine === 'css') {
+            $converter = new CssSelectorConverter();
+            $selector = $converter->toXPath($selector);
+        }
+
+        do {
+            $element = $this->mink->assertSession()->elementExists($engine, $selector);
+            if ($element->isVisible() === $visible) return;
+            usleep(500000);
+            $timeout -= 500000;
+        } while ($timeout > 0);
+
+        throw new \Exception("The element with selector '$selector' is " . ($visible ? 'not ' : '') . 'visible on the page.');
     }
 
     /**
@@ -316,7 +351,7 @@ abstract class CommandBase extends Command
         $this->session->getPage()->fillField('userName', $config->get('credentials.username'));
         $this->session->getPage()->fillField('pwd', $config->get('credentials.password'));
         $this->session->getPage()->find('css', '#m_ctrl_Page button.primary')->click();
-        $this->waitUntilElementPresent('#main .themebox.ind');
+        $this->waitForElementPresence('#main .themebox.ind');
     }
 
     /**
@@ -329,7 +364,7 @@ abstract class CommandBase extends Command
     {
         $selector = $account_type === 'individual' ? '#main .themebox.ind a.btn.secondary' : '#main .themebox.corp a.btn.secondary';
         $this->session->getPage()->find('css', $selector)->click();
-        $this->waitUntilElementPresent('#head a.logo');
+        $this->waitForElementPresence('#head a.logo');
         // Close the marketing banner if it is present.
         $this->closeCampaignContent();
     }
