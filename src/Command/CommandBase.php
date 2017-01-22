@@ -266,6 +266,26 @@ abstract class CommandBase extends Command
     }
 
     /**
+     * Validator for numeric arguments.
+     *
+     * @param string $input
+     *   The input from the user.
+     *
+     * @return string
+     *   The input from the user.
+     *
+     * @throws \InvalidArgumentException
+     *   Thrown when the input is not numeric.
+     */
+    public static function numericValidator($input)
+    {
+        if (empty(trim($input)) || !is_numeric(trim($input))) {
+            throw new \InvalidArgumentException('Please enter a numeric value.');
+        }
+        return $input;
+    }
+
+    /**
      * Waits for the given element to appear or disappear from the DOM.
      *
      * @param string $selector
@@ -338,6 +358,19 @@ abstract class CommandBase extends Command
         // URL directly because we would lose session information passed by
         // query arguments.
         $this->session->getPage()->find('css', '#head a.logo')->click();
+    }
+
+    /**
+     * Clicks the link with the given link text in the main navigation menu.
+     *
+     * @param string $account_type
+     *   The account type, either 'individual' or 'corporate'.
+     * @param string $link_text
+     *   The link text to click.
+     */
+    protected function clickMainNavigationLink($account_type, $link_text)
+    {
+        $this->session->getPage()->find('xpath', '//table[@class="' . $account_type . '"]//a[text()="' . $link_text . '"]')->click();
     }
 
     /**

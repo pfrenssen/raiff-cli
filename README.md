@@ -70,5 +70,7 @@ ask you for the details.
 $ ./raiffcli transfer:in-leva
 ```
 
-Note that you will still need to log in to the site manually to sign and send
-the transactions.
+Finally you can sign the transactions using the Digipass device.
+```
+$ ./raiffcli transfer:sign
+```
