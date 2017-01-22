@@ -87,8 +87,7 @@ abstract class CommandBase extends Command
         if (count($accounts) == 1) {
             $account = reset($accounts);
             $input->setArgument('account', $account);
-        }
-        else {
+        } else {
             // @todo Ask which account to use if there are multiple accounts.
             throw new \Exception('Support for multiple accounts is not implemented yet.');
         }
@@ -110,7 +109,8 @@ abstract class CommandBase extends Command
      * @return array
      *   The recipient array.
      */
-    protected function askRecipient(InputInterface $input, OutputInterface $output, $allow_empty = false, $type = '') {
+    protected function askRecipient(InputInterface $input, OutputInterface $output, $allow_empty = false, $type = '')
+    {
         // Retrieve the recipients.
         $config = $this->getConfigManager()->get('recipients');
         $recipients = $config->get('recipients', []);

@@ -218,7 +218,8 @@ abstract class TransferBase extends CommandBase
      * @param array $transactions
      *   The array of transactions to output.
      */
-    protected function outputTransactionTable(OutputInterface $output, array $transactions) {
+    protected function outputTransactionTable(OutputInterface $output, array $transactions)
+    {
         $output->writeln('Transactions:');
         $table = new Table($output);
         $table->setHeaders(['Recipient', 'Amount', 'Description']);
@@ -226,9 +227,9 @@ abstract class TransferBase extends CommandBase
 
         foreach ($transactions as $transaction) {
             $table->addRow([
-              $transaction['recipient']['name'],
-              $transaction['amount'],
-              $transaction['description'],
+                $transaction['recipient']['name'],
+                $transaction['amount'],
+                $transaction['description'],
             ]);
         }
         $table->render();
@@ -243,7 +244,8 @@ abstract class TransferBase extends CommandBase
      * @return array
      *   The transactions.
      */
-    protected function getStoredTransactions($account_type) {
+    protected function getStoredTransactions($account_type)
+    {
         $config = $this->getConfigManager()->get('transactions');
         $transactions = $config->get($this->getName(), []);
         return !empty($transactions[$account_type]) ? $transactions[$account_type] : [];
@@ -257,7 +259,8 @@ abstract class TransferBase extends CommandBase
      * @param string $account_type
      *   The account type for which this transaction has been entered.
      */
-    protected function storeTransactions(array $transactions, $account_type) {
+    protected function storeTransactions(array $transactions, $account_type)
+    {
         $config = $this->getConfigManager()->get('transactions');
         $stored_transactions = $config->get($this->getName());
         $stored_transactions[$account_type] = $transactions;
@@ -270,7 +273,8 @@ abstract class TransferBase extends CommandBase
      * @param array $transaction
      *   The transaction to delete.
      */
-    protected function deleteStoredTransaction(array $transaction) {
+    protected function deleteStoredTransaction(array $transaction)
+    {
         $config = $this->getConfigManager()->get('transactions');
         $data = $config->get($this->getName(), []);
         foreach ($data as $account_type => $transactions) {
@@ -371,7 +375,8 @@ abstract class TransferBase extends CommandBase
     /**
      * Closes the marketing campaign dialog if it is present.
      */
-    protected function closeCampaignContent() {
+    protected function closeCampaignContent()
+    {
         $page = $this->session->getPage();
         if ($page->find('css', '#CampaignContent')) {
             $page->find('css', 'a.ui-dialog-titlebar-close')->click();
