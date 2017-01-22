@@ -66,6 +66,13 @@ abstract class CommandBase extends Command
      *   The output interface.
      * @param string $type
      *   The account type, either 'individual' or 'corporate'.
+     *
+     * @throws \Exception
+     *   Thrown when there are multiple accounts for one account type. This is
+     *   not implemented yet.
+     * @throws \LogicException
+     *   Thrown when no accounts have been configured for the given account
+     *   type.
      */
     protected function askAccount(InputInterface $input, OutputInterface $output, $type)
     {
