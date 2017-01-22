@@ -21,6 +21,8 @@ abstract class TransferBase extends CommandBase
      */
     protected function configure()
     {
+        parent::configure();
+
         $this
             ->addAccountTypeArgument()
             ->addAccountArgument()
