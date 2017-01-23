@@ -45,14 +45,14 @@ class InForeignCurrency extends TransferBase
 
         foreach ($transactions as $transaction) {
             // Open the "In foreign currency" payment form.
-            $this->waitUntilElementPresent('#NewPaymentTypes');
+            $this->waitForElementPresence('#NewPaymentTypes');
             $this->session->getPage()->clickLink('In foreign currency');
 
             // Choose the account.
             $this->chooseAccount($account);
 
             // Fill in the fields.
-            $this->waitUntilElementPresent('#PayeeName');
+            $this->waitForElementPresence('#PayeeName');
             $this->session->getPage()->fillField('Document.PayeeName', $transaction['recipient']['name']);
             $this->session->getPage()->fillField('Document.PayeeAccountNumber', $transaction['recipient']['iban']);
             $this->session->getPage()->fillField('Document.PayeeAddress', $transaction['recipient']['address']);
@@ -74,17 +74,17 @@ class InForeignCurrency extends TransferBase
             $this->session->getPage()->findById('FCCYOpCodeSelector')->click();
             // The operation type dialog box doesn't have an identifier. Nice.
             $operation_type_select_xpath = '//div[@aria-labelledby="ui-dialog-title-1"]/div/fieldset[@class="col1"]/div[@class="column"][1]/select';
-            $this->waitUntilElementPresent($operation_type_select_xpath, 'xpath');
+            $this->waitForElementPresence($operation_type_select_xpath, 'xpath');
             // @todo Support other operations than "Other private transfers".
             $this->session->getPage()->find('xpath', $operation_type_select_xpath)->selectOption('4');
-            $this->waitUntilElementPresent('#OpCodePick');
+            $this->waitForElementPresence('#OpCodePick');
             $this->session->getPage()->selectFieldOption('OpCodePick', '629');
             $this->session->getPage()->find('xpath', '//div[@aria-labelledby="ui-dialog-title-1"]/div/div/button')->click();
 
             // Submit the form.
             sleep(1);
             $this->session->getPage()->findById('btnSave')->click();
-            $this->waitUntilElementPresent('#SaveOKResultHolder');
+            $this->waitForElementPresence('#SaveOKResultHolder');
 
             // The transaction succeeded. Remove it from the disk cache.
             $this->deleteStoredTransaction($transaction);

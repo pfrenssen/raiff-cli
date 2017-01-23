@@ -45,14 +45,14 @@ class InLeva extends TransferBase
 
         foreach ($transactions as $transaction) {
             // Open the "In leva" payment form.
-            $this->waitUntilElementPresent('#NewPaymentTypes');
+            $this->waitForElementPresence('#NewPaymentTypes');
             $this->session->getPage()->clickLink('In leva');
 
             // Choose the account.
             $this->chooseAccount($account);
 
             // Fill in the fields.
-            $this->waitUntilElementPresent('#Document_PayeeName');
+            $this->waitForElementPresence('#Document_PayeeName');
             $this->session->getPage()->fillField('Document_PayeeName', $transaction['recipient']['name']);
             $this->session->getPage()->fillField('Document_PayeeIBAN', $transaction['recipient']['iban']);
             $this->session->getPage()->fillField('Document_Amount', $transaction['amount']);
@@ -61,7 +61,7 @@ class InLeva extends TransferBase
             // Submit the form.
             sleep(1);
             $this->session->getPage()->findById('btnSave')->click();
-            $this->waitUntilElementPresent('#SaveOKResultHolder');
+            $this->waitForElementPresence('#SaveOKResultHolder');
 
             // The transaction succeeded. Remove it from the disk cache.
             $this->deleteStoredTransaction($transaction);

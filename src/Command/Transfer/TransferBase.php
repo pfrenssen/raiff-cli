@@ -244,9 +244,9 @@ abstract class TransferBase extends CommandBase
      */
     protected function chooseAccount($account)
     {
-        $this->waitUntilElementPresent('#showPayerPicker');
+        $this->waitForElementPresence('#showPayerPicker');
         $this->session->getPage()->findById('showPayerPicker')->click();
-        $this->waitUntilElementPresent('#accounts');
+        $this->waitForElementPresence('#accounts');
         $this->session->getPage()->find('xpath', '//*[@id="accounts"]/table//tr/td[text()[contains(., "' . $account . '")]]')->click();
     }
 
