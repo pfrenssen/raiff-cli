@@ -74,10 +74,10 @@ class Sign extends CommandBase
         // Click the checkbox to select all transfers.
         $this->session->getPage()->checkField('pending_master_checkbox');
 
-        // Click the 'Sign' button.
-        // @todo Only corporate accounts have separate buttons for signing and
-        //   sending. This needs to be adapted for personal accounts.
-        $this->session->getPage()->clickLink('payments_sign');
+        // Click the 'Sign' button (for corporate accounts), or the 'Send'
+        // button (for individual accounts).
+        $button_id = $account_type === 'corporate' ? 'payments_sign' : 'payments_sign_send';
+        $this->session->getPage()->clickLink($button_id);
 
         // Wait for the dialog box to appear.
         $this->waitForElementPresence('div#response_form');
@@ -98,23 +98,40 @@ class Sign extends CommandBase
         $this->session->getPage()->pressButton('authorize_ok');
         $this->waitForElementPresence('div.infoSuccess');
 
-        // Navigate back to the overview.
-        $this->navigateToHomepage();
-        $this->clickMainNavigationLink($account_type, 'Transfers');
-        $this->waitForElementPresence('#paymentResult');
-
-        // Check all transfers and click on "Send".
-        $this->session->getPage()->checkField('pending_master_checkbox');
-        $this->session->getPage()->clickLink('payments_send');
-
-        // Wait for the dialog box to appear.
-        $this->waitForElementPresence('div#SignSendPreview');
-
-        // Confirm.
-        $this->session->getPage()->pressButton('ok');
-        $this->waitForElementPresence('div.infoSuccess');
-
         // Print results.
+        $this->printMessages($output);
+
+        // In corporate accounts the sending of the transactions is performed in
+        // a separate step. This is not needed for personal accounts.
+        if ($account_type === 'corporate') {
+            // Navigate back to the overview.
+            $this->navigateToHomepage();
+            $this->clickMainNavigationLink($account_type, 'Transfers');
+            $this->waitForElementPresence('#paymentResult');
+
+            // Check all transfers and click on "Send".
+            $this->session->getPage()->checkField('pending_master_checkbox');
+            $this->session->getPage()->clickLink('payments_send');
+
+            // Wait for the dialog box to appear.
+            $this->waitForElementPresence('div#SignSendPreview');
+
+            // Confirm.
+            $this->session->getPage()->pressButton('ok');
+            $this->waitForElementPresence('div.infoSuccess');
+
+            // Print results.
+            $this->printMessages($output);
+        }
+    }
+
+    /**
+     * Outputs any success messages present in the web page to the console.
+     *
+     * @param OutputInterface $output
+     *   The output handler.
+     */
+    protected function printMessages(OutputInterface $output) {
         $elements = $this->session->getPage()->findAll('css', 'div.infoSuccess p');
         foreach ($elements as $element) {
             $result = trim($element->getText());
