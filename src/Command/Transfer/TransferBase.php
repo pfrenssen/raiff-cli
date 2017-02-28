@@ -210,7 +210,7 @@ abstract class TransferBase extends CommandBase
     protected function storeTransactions(array $transactions, $account_type)
     {
         $config = $this->getConfigManager()->get('transactions');
-        $stored_transactions = $config->get($this->getName());
+        $stored_transactions = $config->get($this->getName(), []);
         $stored_transactions[$account_type] = $transactions;
         $config->set($this->getName(), $stored_transactions)->save();
     }
