@@ -7,6 +7,7 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 
@@ -106,6 +107,14 @@ abstract class TransferBase extends CommandBase
                 continue;
             }
 
+            // If the amount is larger than 30000 leva we need to declare the
+            // origin of the funds.
+            $origin = '';
+            if ($currency === 'BGN' && $amount > 30000.00) {
+                $question = new ChoiceQuestion('Origin of funds:', static::getFundOrigins(), 'Commercial activity');
+                $origin = $helper->ask($input, $output, $question);
+            }
+
             // Ask for the description.
             $question = new Question('Description: ');
             $description = $helper->ask($input, $output, $question);
@@ -119,6 +128,7 @@ abstract class TransferBase extends CommandBase
             $transactions[] = [
                 'recipient' => $recipient,
                 'amount' => $amount,
+                'origin' => $origin,
                 'description' => $description,
             ];
             $output->writeln("<info>Added transaction to {$recipient['name']} for $amount $currency: '$description'</info>");
@@ -260,6 +270,33 @@ abstract class TransferBase extends CommandBase
     protected function getRecipientNationality()
     {
         return '';
+    }
+
+    /**
+     * Returns the possible fund origins.
+     *
+     * @return array
+     *   Array containing possible fund origins.
+     */
+    protected static function getFundOrigins() {
+        return [
+            'Commercial activity',
+            'Agricultural activity',
+            'Personal labour services',
+            'Liberal labour services',
+            'Received loan',
+            'Real estate sale',
+            'Vehicle sale',
+            'Received rent',
+            'Donation',
+            'Savings',
+            'Inheritance',
+            'Labour remuneration',
+            'Dividend',
+            'Insurance paid',
+            'Deal with financial instruments',
+            'Other income from legal activity',
+        ];
     }
 
 }

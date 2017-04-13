@@ -82,6 +82,20 @@ class Sign extends CommandBase
         // Wait for the dialog box to appear.
         $this->waitForElementPresence('div#response_form');
 
+        // Confirm any declarations of origin of money that are present in the
+        // dialog box.
+        $transaction_rows = $this->session->getPage()->findAll('css', '#SignSendPreview > table tr');
+        /** @var \Behat\Mink\Element\NodeElement $transaction_row */
+        foreach ($transaction_rows as $transaction_row) {
+            $declaration_link = $transaction_row->find('css', 'a.dirtyMoney');
+            if (!empty($declaration_link)) {
+                $declaration_link->click();
+                $this->waitForElementPresence('//div[@id="DirtyMoneyDeclarationForm"]', 'xpath');
+                $this->session->getPage()->pressButton('sendDirtyMontdlnk');
+                $this->waitForElementPresence('//div[@id="DirtyMoneyDeclarationForm"]', 'xpath', FALSE);
+            }
+        }
+
         // Retrieve the challenge. Its containing elements are not identifiable
         // so we have to count elements.
         $element = $this->session->getPage()->find('xpath', '//div[@id="response_form"]/div[1]/div[2]');

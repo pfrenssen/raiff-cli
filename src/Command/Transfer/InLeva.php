@@ -58,6 +58,12 @@ class InLeva extends TransferBase
             $this->session->getPage()->fillField('Document_Amount', $transaction['amount']);
             $this->session->getPage()->fillField('Document_Description1', $transaction['description']);
 
+            // If the amount is over 30000 leva the origin of the funds needs to
+            // be declared.
+            if ($transaction['amount'] > 30000.00 && !empty($transaction['origin'])) {
+                $this->session->getPage()->fillField('DirtyMoneyContainer_DirtyValue', $transaction['origin']);
+            }
+
             // Submit the form.
             sleep(1);
             $this->session->getPage()->findById('btnSave')->click();
