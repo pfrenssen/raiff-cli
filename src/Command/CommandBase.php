@@ -381,6 +381,7 @@ abstract class CommandBase extends Command
         $config = $this->getConfigManager()->get('config');
         $base_url = $config->get('base_url');
         $this->session->visit($base_url);
+        $this->closeSecurityWarning();
         $this->session->getPage()->fillField('userName', $config->get('credentials.username'));
         $this->session->getPage()->fillField('pwd', $config->get('credentials.password'));
         $this->session->getPage()->find('css', '#m_ctrl_Page button.primary')->click();
@@ -407,11 +408,29 @@ abstract class CommandBase extends Command
      */
     protected function closeCampaignContent()
     {
+        $this->closeDialog('CampaignContent');
+    }
+
+    /**
+     * Closes the security warning if it is present.
+     */
+    protected function closeSecurityWarning()
+    {
+        $this->closeDialog('ui-dialog-title-lbSecutiryWarnings');
+    }
+
+    /**
+     * Closes the dialog with the given CSS ID if it is present.
+     *
+     * @param string $id
+     *   The CSS ID of the dialog.
+     */
+    protected function closeDialog($id)
+    {
         $page = $this->session->getPage();
-        if ($page->find('css', '#CampaignContent')) {
+        if ($page->find('css', '#' . $id)) {
             $page->find('css', 'a.ui-dialog-titlebar-close')->click();
         }
     }
-
 
 }
