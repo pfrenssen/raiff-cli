@@ -1,4 +1,4 @@
-base_url: 'https://online.rbb.bg/page/default.aspx?user_id=&session_id=&xml_id=/en-US/.login'
+base_url: 'https://online.rbb.bg/en-US/none/Login/Index'
 
 credentials:
   username: 'my username'

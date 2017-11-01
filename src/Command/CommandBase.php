@@ -382,10 +382,10 @@ abstract class CommandBase extends Command
         $base_url = $config->get('base_url');
         $this->session->visit($base_url);
         $this->closeSecurityWarning();
-        $this->session->getPage()->fillField('userName', $config->get('credentials.username'));
-        $this->session->getPage()->fillField('pwd', $config->get('credentials.password'));
-        $this->session->getPage()->find('css', '#m_ctrl_Page button.primary')->click();
-        $this->waitForElementPresence('#main .themebox.ind');
+        $this->session->getPage()->fillField('id_Model_UserName', $config->get('credentials.username'));
+        $this->session->getPage()->fillField('id_Model_Password', $config->get('credentials.password'));
+        $this->session->getPage()->find('css', '.btn-login')->click();
+        $this->waitForElementPresence('.profile-selection');
     }
 
     /**
