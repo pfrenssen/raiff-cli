@@ -3,6 +3,7 @@
     "description": "Command line interface for bank transfers on online.rbb.bg.",
     "license": "GPL-3.0",
     "require": {
+        "php": ">=7.1.0",
         "behat/mink": "^1.7",
         "behat/mink-selenium2-driver": "^1.3",
         "jcalderonzumba/mink-phantomjs-driver": "^0.3.1",

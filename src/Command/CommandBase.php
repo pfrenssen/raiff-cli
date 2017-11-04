@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace RaiffCli\Command;
 
 use Behat\Mink\Driver\Selenium2Driver;
 use Behat\Mink\Mink;
 use Behat\Mink\Session;
+use RaiffCli\Config\ConfigManager;
+use RaiffCli\Helper\ContainerHelper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -39,7 +43,7 @@ abstract class CommandBase extends Command
      * @return \RaiffCli\Helper\ContainerHelper
      *   The dependency injection container helper.
      */
-    protected function getContainer()
+    protected function getContainer() : ContainerHelper
     {
         return $this->getHelper('container');
     }
@@ -50,7 +54,7 @@ abstract class CommandBase extends Command
      * @return \RaiffCli\Config\ConfigManager
      *   The configuration manager.
      */
-    protected function getConfigManager()
+    protected function getConfigManager() : ConfigManager
     {
         return $this->getContainer()->get('config.manager');
     }
@@ -58,10 +62,10 @@ abstract class CommandBase extends Command
     /**
      * Returns the Mink session manager.
      *
-     * @return Mink
+     * @return \Behat\Mink\Mink
      *   The Mink session manager.
      */
-    protected function getMink()
+    protected function getMink() : Mink
     {
         if (empty($this->mink)) {
             $this->mink = $this->initMink();
@@ -72,10 +76,10 @@ abstract class CommandBase extends Command
     /**
      * Returns the Mink session.
      *
-     * @return Session
+     * @return \Behat\Mink\Session
      *   The Mink session.
      */
-    protected function getSession()
+    protected function getSession() : Session
     {
         return $this->getMink()->getSession();
     }
@@ -83,10 +87,10 @@ abstract class CommandBase extends Command
     /**
      * Initializes Mink.
      *
-     * @return Mink
+     * @return \Behat\Mink\Mink
      *   The initialized Mink session manager.
      */
-    protected function initMink()
+    protected function initMink() : Mink
     {
         $mink = new Mink();
         $config = $this->getConfigManager()->get('config');
@@ -111,7 +115,7 @@ abstract class CommandBase extends Command
      *
      * @return $this
      */
-    protected function addAccountTypeArgument()
+    protected function addAccountTypeArgument() : CommandBase
     {
         $this->addArgument('account-type', InputArgument::REQUIRED, 'The account type to use: either "individual" or "corporate"');
 
@@ -126,7 +130,7 @@ abstract class CommandBase extends Command
      * @param \Symfony\Component\Console\Output\OutputInterface $output
      *   The output interface.
      */
-    protected function askAccountType(InputInterface $input, OutputInterface $output)
+    protected function askAccountType(InputInterface $input, OutputInterface $output) : void
     {
         $account = $input->getArgument('account-type');
         if (empty($account) || !in_array($account, ['individual', 'corporate'])) {
@@ -142,7 +146,7 @@ abstract class CommandBase extends Command
      *
      * @return $this
      */
-    protected function addAccountArgument()
+    protected function addAccountArgument() : CommandBase
     {
         $this->addArgument('account', InputArgument::REQUIRED, 'The account to use');
 
@@ -166,7 +170,7 @@ abstract class CommandBase extends Command
      *   Thrown when no accounts have been configured for the given account
      *   type.
      */
-    protected function askAccount(InputInterface $input, OutputInterface $output, $type)
+    protected function askAccount(InputInterface $input, OutputInterface $output, $type) : void
     {
         $config = $this->getConfigManager()->get('accounts');
         $accounts = $config->get($type, []);
@@ -201,7 +205,7 @@ abstract class CommandBase extends Command
      * @return array
      *   The recipient array.
      */
-    protected function askRecipient(InputInterface $input, OutputInterface $output, $allow_empty = false, $type = '')
+    protected function askRecipient(InputInterface $input, OutputInterface $output, bool $allow_empty = false, string $type = '') : array
     {
         // Retrieve the recipients.
         $config = $this->getConfigManager()->get('recipients');
@@ -257,7 +261,7 @@ abstract class CommandBase extends Command
      * @throws \InvalidArgumentException
      *   Thrown when the input is empty.
      */
-    public static function requiredValidator($input)
+    public static function requiredValidator(string $input) : string
     {
         if (empty(trim($input))) {
             throw new \InvalidArgumentException('Please enter a value.');
@@ -277,7 +281,7 @@ abstract class CommandBase extends Command
      * @throws \InvalidArgumentException
      *   Thrown when the input is not numeric.
      */
-    public static function numericValidator($input)
+    public static function numericValidator(string $input) : string
     {
         if (empty(trim($input)) || !is_numeric(trim($input))) {
             throw new \InvalidArgumentException('Please enter a numeric value.');
@@ -299,7 +303,7 @@ abstract class CommandBase extends Command
      * @throws \Exception
      *   Thrown when the element doesn't appear or disappear within 20 seconds.
      */
-    protected function waitForElementPresence($selector, $engine = 'css', $present = TRUE)
+    protected function waitForElementPresence(string $selector, string $engine = 'css', bool $present = TRUE) : void
     {
         $timeout = 20000000;
         if ($engine === 'css') {
@@ -331,7 +335,7 @@ abstract class CommandBase extends Command
      * @throws \Exception
      *   Thrown when the element doesn't become (in)visible within 20 seconds.
      */
-    protected function waitForElementVisibility($selector, $engine = 'css', $visible = TRUE)
+    protected function waitForElementVisibility(string $selector, string $engine = 'css', bool $visible = TRUE) : void
     {
         $timeout = 20000000;
         if ($engine === 'css') {
@@ -352,7 +356,7 @@ abstract class CommandBase extends Command
     /**
      * Visits the homepage.
      */
-    protected function navigateToHomepage()
+    protected function navigateToHomepage() : void
     {
         // Navigate to the homepage by clicking on the logo. We cannot visit the
         // URL directly because we would lose session information passed by
@@ -368,7 +372,7 @@ abstract class CommandBase extends Command
      * @param string $link_text
      *   The link text to click.
      */
-    protected function clickMainNavigationLink($account_type, $link_text)
+    protected function clickMainNavigationLink(string $account_type, string $link_text) : void
     {
         $this->session->getPage()->find('xpath', '//table[@class="' . $account_type . '"]//a[text()="' . $link_text . '"]')->click();
     }
@@ -376,7 +380,7 @@ abstract class CommandBase extends Command
     /**
      * Logs in.
      */
-    protected function logIn()
+    protected function logIn() : void
     {
         $config = $this->getConfigManager()->get('config');
         $base_url = $config->get('base_url');
@@ -394,7 +398,7 @@ abstract class CommandBase extends Command
      * @param string $account_type
      *   The account type, either 'individual' or 'corporate'.
      */
-    protected function selectAccountType($account_type)
+    protected function selectAccountType(string $account_type) : void
     {
         $selector = $account_type === 'individual' ? '#main .themebox.ind a.btn.secondary' : '#main .themebox.corp a.btn.secondary';
         $this->session->getPage()->find('css', $selector)->click();
@@ -406,7 +410,7 @@ abstract class CommandBase extends Command
     /**
      * Closes the marketing campaign dialog if it is present.
      */
-    protected function closeCampaignContent()
+    protected function closeCampaignContent() : void
     {
         $this->closeDialog('CampaignContent');
     }
@@ -414,7 +418,7 @@ abstract class CommandBase extends Command
     /**
      * Closes the security warning if it is present.
      */
-    protected function closeSecurityWarning()
+    protected function closeSecurityWarning() : void
     {
         $this->closeDialog('ui-dialog-title-lbSecutiryWarnings');
     }
@@ -425,7 +429,7 @@ abstract class CommandBase extends Command
      * @param string $id
      *   The CSS ID of the dialog.
      */
-    protected function closeDialog($id)
+    protected function closeDialog(string $id) : void
     {
         $page = $this->session->getPage();
         if ($page->find('css', '#' . $id)) {
