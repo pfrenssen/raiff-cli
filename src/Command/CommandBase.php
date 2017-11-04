@@ -400,8 +400,8 @@ abstract class CommandBase extends Command
      */
     protected function selectAccountType(string $account_type) : void
     {
-        $selector = $account_type === 'individual' ? '#main .themebox.ind a.btn.secondary' : '#main .themebox.corp a.btn.secondary';
-        $this->session->getPage()->find('css', $selector)->click();
+        $selector = '//button[contains(@data-bind, "' . $account_type . '")]';
+        $this->session->getPage()->find('xpath', $selector)->click();
         $this->waitForElementPresence('#head a.logo');
         // Close the marketing banner if it is present.
         $this->closeCampaignContent();
