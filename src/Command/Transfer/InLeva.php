@@ -40,33 +40,35 @@ class InLeva extends TransferBase
         // Choose between individual and corporate account.
         $this->selectAccountType($account_type);
 
-        // Start from the homepage.
-        $this->navigateToHomepage();
+        // Start from the Transfers page.
+        $this->clickMainNavigationLink('transfers');
 
         foreach ($transactions as $transaction) {
+            // Click "New transfer".
+            $this->clickSecondaryNavigationLink('New transfer');
+            $this->waitForLinkButtonPresence('In leva');
             // Open the "In leva" payment form.
-            $this->waitForElementPresence('#NewPaymentTypes');
-            $this->session->getPage()->clickLink('In leva');
+            $this->clickLinkButton('In leva');
+            $this->waitForElementPresence('.pmt-form');
 
             // Choose the account.
             $this->chooseAccount($account);
 
             // Fill in the fields.
-            $this->waitForElementPresence('#Document_PayeeName');
-            $this->session->getPage()->fillField('Document_PayeeName', $transaction['recipient']['name']);
-            $this->session->getPage()->fillField('Document_PayeeIBAN', $transaction['recipient']['iban']);
-            $this->session->getPage()->fillField('Document_Amount', $transaction['amount']);
-            $this->session->getPage()->fillField('Document_Description1', $transaction['description']);
+            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_PayeeName', $transaction['recipient']['name']);
+            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_PayeeIBAN', $transaction['recipient']['iban']);
+            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_Amount', $transaction['amount']);
+            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_Description1', $transaction['description']);
 
             // If the amount is over 30000 leva the origin of the funds needs to
             // be declared.
             if ($transaction['amount'] > 30000.00 && !empty($transaction['origin'])) {
-                $this->session->getPage()->fillField('DirtyMoneyContainer_DirtyValue', $transaction['origin']);
+                $this->session->getPage()->fillField('id_Model_DirtyMoney_Model_DirtyMoney', $transaction['origin']);
             }
 
             // Submit the form.
             sleep(1);
-            $this->session->getPage()->findById('btnSave')->click();
+            $this->clickLinkButton('Save');
             $this->waitForElementPresence('#SaveOKResultHolder');
 
             // The transaction succeeded. Remove it from the disk cache.

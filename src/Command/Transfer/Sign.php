@@ -55,7 +55,7 @@ class Sign extends CommandBase
         $this->navigateToHomepage();
 
         // Navigate to the transfers overview page.
-        $this->clickMainNavigationLink($account_type, 'Transfers');
+        $this->clickMainNavigationLink('Transfers');
         $this->waitForElementPresence('#paymentResult');
 
         // Check if there are any pending transfers.
@@ -120,7 +120,7 @@ class Sign extends CommandBase
         if ($account_type === 'corporate') {
             // Navigate back to the overview.
             $this->navigateToHomepage();
-            $this->clickMainNavigationLink($account_type, 'Transfers');
+            $this->clickMainNavigationLink('Transfers');
             $this->waitForElementPresence('#paymentResult');
 
             // Check all transfers and click on "Send".

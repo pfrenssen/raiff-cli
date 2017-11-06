@@ -254,10 +254,25 @@ abstract class TransferBase extends CommandBase
      */
     protected function chooseAccount($account)
     {
-        $this->waitForElementPresence('#showPayerPicker');
-        $this->session->getPage()->findById('showPayerPicker')->click();
-        $this->waitForElementPresence('#accounts');
-        $this->session->getPage()->find('xpath', '//*[@id="accounts"]/table//tr/td[text()[contains(., "' . $account . '")]]')->click();
+        // Click "Choose an account from the list".
+        $this->clickLinkButton('Choose an account from the list');
+
+        $modal_selector = '//div[@class = "modal-content"]';
+        $account_row_selector = $modal_selector . '//tr[@data-selectionmode = "Single" and .//span[text() = "' . $account . '"]]';
+
+        // Wait for the modal to be created and faded in.
+        $this->waitForElementPresence($modal_selector, 'xpath');
+        $this->waitForElementVisibility($modal_selector, 'xpath');
+
+        // Wait for the account row itself to be loaded.
+        $this->waitForElementPresence($account_row_selector, 'xpath');
+
+        // Click the row containing the given account.
+        $this->session->getPage()->find('xpath', $account_row_selector)->click();
+
+        // Wait until the modal disappears and the chosen account appears.
+        $this->waitForElementPresence('//div[contains(@class, "modal-backdrop")]', 'xpath', FALSE);
+        $this->waitForElementPresence('//span[normalize-space(text()) = "Choose a different account"]', 'xpath');
     }
 
     /**

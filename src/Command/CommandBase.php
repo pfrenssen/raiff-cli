@@ -354,27 +354,93 @@ abstract class CommandBase extends Command
     }
 
     /**
+     * Waits for the link button with the given text to appear or disappear.
+     *
+     * @param string $link_text
+     *   The link text.
+     * @param bool $present
+     *   TRUE to wait for the element to appear, FALSE for it to disappear.
+     *   Defaults to TRUE.
+     */
+    protected function waitForLinkButtonPresence(string $link_text, bool $present = TRUE) : void
+    {
+        $this->waitForElementPresence('//button[contains(concat(" ", normalize-space(@class), " "), " btn-primary ") and .//span[normalize-space(text()) = "' . $link_text . '"]]', 'xpath', $present);
+    }
+
+    /**
      * Visits the homepage.
      */
     protected function navigateToHomepage() : void
     {
-        // Navigate to the homepage by clicking on the logo. We cannot visit the
-        // URL directly because we would lose session information passed by
-        // query arguments.
-        $this->session->getPage()->find('css', '#head a.logo')->click();
+        // Navigate to the homepage by clicking on the icon in the main menu. We
+        // cannot navigate to the URL directly because we would lose session
+        // information passed in the URL.
+        $this->clickMainNavigationLink('home');
     }
 
     /**
      * Clicks the link with the given link text in the main navigation menu.
      *
-     * @param string $account_type
-     *   The account type, either 'individual' or 'corporate'.
      * @param string $link_text
      *   The link text to click.
      */
-    protected function clickMainNavigationLink(string $account_type, string $link_text) : void
+    protected function clickMainNavigationLink(string $link_text) : void
     {
-        $this->session->getPage()->find('xpath', '//table[@class="' . $account_type . '"]//a[text()="' . $link_text . '"]')->click();
+        $link_text = $this->capitalizeMainNavigationLinkText($link_text);
+        $this->session->getPage()->find('xpath', '//nav[contains(@class, "nav-main") and not(contains(@class, "nav-mobile"))]//a[span[@title = "' . $link_text . '"]]')->click();
+    }
+
+    protected function clickSecondaryNavigationLink(string $link_text) : void
+    {
+        $this->session->getPage()->find('xpath', '//ul[contains(concat(" ", normalize-space(@class), " "), " nav-tabs ")]//a[span[@title = "' . $link_text . '"]]')->click();
+    }
+
+    /**
+     * Clicks a "button link" that contains the given link text.
+     *
+     * These buttons can be identified by having the 'btn-primary' class, and
+     * the link text is contained in a set of spans.
+     *
+     * @param string $link_text
+     */
+    protected function clickLinkButton(string $link_text) : void
+    {
+        $this->session->getPage()->find('xpath', '//button[contains(concat(" ", normalize-space(@class), " "), " btn-primary ") and .//span[normalize-space(text()) = "' . $link_text . '"]]')->click();
+    }
+
+    /**
+     * Return the main navigation link in the correct capitalization.
+     *
+     * The navigation link text is inconsistently capitalized.
+     *
+     * @param string $link_text
+     *   The case-insensitive link text.
+     *
+     * @return string
+     *   The link text using the correct capitalization.
+     *
+     * @throws \Exception
+     *   Thrown when an unknown link text is being passed.
+     */
+    protected function capitalizeMainNavigationLinkText(string $link_text) : string
+    {
+        $link_texts = [
+            'home' => 'home',
+            'transfers' => 'Transfers',
+            'accounts' => 'accounts',
+            'cards' => 'cards',
+            'loans' => 'loans',
+            'deposits' => 'deposits',
+            'investments' => 'investments',
+            'offers' => 'offers',
+            'forms' => 'forms',
+            'financing' => 'financing',
+        ];
+        $key = strtolower($link_text);
+        if (!array_key_exists($key, $link_texts)) {
+            throw new \Exception("Unknown link text '$link_text'.");
+        }
+        return $link_texts[$key];
     }
 
     /**
@@ -402,7 +468,7 @@ abstract class CommandBase extends Command
     {
         $selector = '//button[contains(@data-bind, "' . $account_type . '")]';
         $this->session->getPage()->find('xpath', $selector)->click();
-        $this->waitForElementPresence('#head a.logo');
+        $this->waitForElementPresence('//nav[contains(@class, "nav-main") and not(contains(@class, "nav-mobile"))]', 'xpath');
         // Close the marketing banner if it is present.
         $this->closeCampaignContent();
     }
