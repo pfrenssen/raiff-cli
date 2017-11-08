@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace RaiffCli\Command\Transfer;
 
 use RaiffCli\Command\CommandBase;
@@ -16,7 +18,7 @@ class Sign extends CommandBase
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure() : void
     {
         parent::configure();
 
@@ -29,7 +31,7 @@ class Sign extends CommandBase
     /**
      * {@inheritdoc}
      */
-    protected function interact(InputInterface $input, OutputInterface $output)
+    protected function interact(InputInterface $input, OutputInterface $output) : void
     {
         $this->askAccountType($input, $output);
         $account_type = $input->getArgument('account-type');
@@ -39,7 +41,7 @@ class Sign extends CommandBase
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output) : void
     {
         $this->session = $this->getSession();
 
@@ -51,36 +53,28 @@ class Sign extends CommandBase
         // Choose between individual and corporate account.
         $this->selectAccountType($account_type);
 
-        // Start from the homepage.
-        $this->navigateToHomepage();
-
-        // Navigate to the transfers overview page.
+        // Navigate to the transfers overview page, waiting a moment for the
+        // dynamic page loading to complete.
         $this->clickMainNavigationLink('Transfers');
-        $this->waitForElementPresence('#paymentResult');
+        $this->waitForLinkButtonPresence('In leva');
+        $this->clickSecondaryNavigationLink('Pending');
+        $this->waitForElementPresence('//a[contains(@data-bind, "filterToggler")]', 'xpath');
 
         // Check if there are any pending transfers.
-        $element = $this->session->getPage()->find('css', 'table#pendingpaymenttable');
+        $element = $this->session->getPage()->find('xpath', '//table//tr//span[contains(@data-bind, "Payment.PayerName")]');
         if (empty($element)) {
             $output->writeln("<comment>The $account_type account has no pending transfers.</comment>");
             return;
         }
 
-        // Expand the table to show all transfers.
-        $this->session->getPage()->find('css', 'a#Paging_ResultsForPage-button')->click();
-        $this->waitForElementPresence('//ul[@id="Paging_ResultsForPage-menu"]/li/a[text()="All"]', 'xpath');
-        $this->session->getPage()->find('xpath', '//ul[@id="Paging_ResultsForPage-menu"]/li/a[text()="All"]')->click();
-        $this->waitForElementVisibility('//div[@id="paymentsResultPaging"]//div[contains(@class, "pagination")]/span[@class="current"]', 'xpath', FALSE);
-
-        // Click the checkbox to select all transfers.
-        $this->session->getPage()->checkField('pending_master_checkbox');
-
         // Click the 'Sign' button (for corporate accounts), or the 'Send'
-        // button (for individual accounts).
-        $button_id = $account_type === 'corporate' ? 'payments_sign' : 'payments_sign_send';
-        $this->session->getPage()->clickLink($button_id);
+        // button (for individual accounts) for all transfers.
+        $this->selectAllTransfers();
+        $button_id = $account_type === 'corporate' ? 'Sign' : 'Send';
+        $this->clickLinkButton($button_id);
 
         // Wait for the dialog box to appear.
-        $this->waitForElementPresence('div#response_form');
+        $this->waitForElementPresence('input#id_Model_Response');
 
         // Confirm any declarations of origin of money that are present in the
         // dialog box.
@@ -96,9 +90,8 @@ class Sign extends CommandBase
             }
         }
 
-        // Retrieve the challenge. Its containing elements are not identifiable
-        // so we have to count elements.
-        $element = $this->session->getPage()->find('xpath', '//div[@id="response_form"]/div[1]/div[2]');
+        // Retrieve the challenge.
+        $element = $this->session->getPage()->find('xpath', '//span[contains(@data-bind, "Model.Challenge")]');
         $challenge = trim($element->getText());
 
         // Ask the response in the console.
@@ -108,9 +101,9 @@ class Sign extends CommandBase
         $response = trim($helper->ask($input, $output, $question));
 
         // Fill in the response in the form.
-        $this->session->getPage()->fillField('Response', $response);
-        $this->session->getPage()->pressButton('authorize_ok');
-        $this->waitForElementPresence('div.infoSuccess');
+        $this->session->getPage()->fillField('id_Model_Response', $response);
+        $this->clickLinkButton('OK');
+        $this->waitForSuccessMessage();
 
         // Print results.
         $this->printMessages($output);
@@ -119,20 +112,22 @@ class Sign extends CommandBase
         // a separate step. This is not needed for personal accounts.
         if ($account_type === 'corporate') {
             // Navigate back to the overview.
-            $this->navigateToHomepage();
+            $this->closeDialog();
             $this->clickMainNavigationLink('Transfers');
-            $this->waitForElementPresence('#paymentResult');
+            $this->waitForLinkButtonPresence('In leva');
+            $this->clickSecondaryNavigationLink('Pending');
+            $this->waitForElementPresence('//a[contains(@data-bind, "filterToggler")]', 'xpath');
 
             // Check all transfers and click on "Send".
-            $this->session->getPage()->checkField('pending_master_checkbox');
-            $this->session->getPage()->clickLink('payments_send');
+            $this->selectAllTransfers();
+            $this->clickLinkButton('Send');
 
             // Wait for the dialog box to appear.
-            $this->waitForElementPresence('div#SignSendPreview');
+            $this->waitForLinkButtonPresence('OK');
 
             // Confirm.
-            $this->session->getPage()->pressButton('ok');
-            $this->waitForElementPresence('div.infoSuccess');
+            $this->clickLinkButton('OK');
+            $this->waitForSuccessMessage();
 
             // Print results.
             $this->printMessages($output);
@@ -145,12 +140,26 @@ class Sign extends CommandBase
      * @param OutputInterface $output
      *   The output handler.
      */
-    protected function printMessages(OutputInterface $output) {
-        $elements = $this->session->getPage()->findAll('css', 'div.infoSuccess p');
+    protected function printMessages(OutputInterface $output) : void
+    {
+        $elements = $this->session->getPage()->findAll('xpath', '//span[@data-bind = "text: Message"]');
         foreach ($elements as $element) {
             $result = trim($element->getText());
             $output->writeln("<comment>$result</comment>");
         }
+    }
+
+    /**
+     * Selects all transfers.
+     */
+    protected function selectAllTransfers() : void
+    {
+        // Expand the table to show all transfers.
+        $this->clickLinkButton('Show all');
+        $this->waitUntilPageLoaded();
+
+        // Click the checkbox to select all transfers.
+        $this->clickLinkButton('Select all');
     }
 
 }

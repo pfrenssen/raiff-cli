@@ -338,11 +338,6 @@ abstract class CommandBase extends Command
     protected function waitForElementVisibility(string $selector, string $engine = 'css', bool $visible = TRUE) : void
     {
         $timeout = 20000000;
-        if ($engine === 'css') {
-            $converter = new CssSelectorConverter();
-            $selector = $converter->toXPath($selector);
-        }
-
         do {
             $element = $this->mink->assertSession()->elementExists($engine, $selector);
             if ($element->isVisible() === $visible) return;
@@ -365,6 +360,22 @@ abstract class CommandBase extends Command
     protected function waitForLinkButtonPresence(string $link_text, bool $present = TRUE) : void
     {
         $this->waitForElementPresence('//button[contains(concat(" ", normalize-space(@class), " "), " btn-primary ") and .//span[normalize-space(text()) = "' . $link_text . '"]]', 'xpath', $present);
+    }
+
+    /**
+     * Waits until the "overlay-loading" element disappears.
+     */
+    protected function waitUntilPageLoaded() : void
+    {
+        $this->waitForElementVisibility('.overlay-loading', 'css', FALSE);
+    }
+
+    /**
+     * Waits until the container for success messages appears.
+     */
+    protected function waitForSuccessMessage() : void
+    {
+        $this->waitForElementPresence('.status-container .text-success');
     }
 
     /**
@@ -478,7 +489,7 @@ abstract class CommandBase extends Command
      */
     protected function closeCampaignContent() : void
     {
-        $this->closeDialog('CampaignContent');
+        $this->closeDialog('CampaignsContent');
     }
 
     /**
@@ -495,11 +506,11 @@ abstract class CommandBase extends Command
      * @param string $id
      *   The CSS ID of the dialog.
      */
-    protected function closeDialog(string $id) : void
+    protected function closeDialog(string $id = NULL) : void
     {
         $page = $this->session->getPage();
-        if ($page->find('css', '#' . $id)) {
-            $page->find('css', 'a.ui-dialog-titlebar-close')->click();
+        if (empty($id) || $page->find('css', '#' . $id)) {
+            $page->find('css', 'button.close')->click();
         }
     }
 

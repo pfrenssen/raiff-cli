@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace RaiffCli\Command\Transfer;
 
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,7 +16,7 @@ class InLeva extends TransferBase
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure() : void
     {
         parent::configure();
 
@@ -26,7 +28,7 @@ class InLeva extends TransferBase
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output) : void
     {
         $this->session = $this->getSession();
 
@@ -69,7 +71,7 @@ class InLeva extends TransferBase
             // Submit the form.
             sleep(1);
             $this->clickLinkButton('Save');
-            $this->waitForElementPresence('#SaveOKResultHolder');
+            $this->waitForSuccessMessage();
 
             // The transaction succeeded. Remove it from the disk cache.
             $this->deleteStoredTransaction($transaction);
@@ -82,7 +84,8 @@ class InLeva extends TransferBase
     /**
      * {@inheritdoc}
      */
-    protected function getRecipientNationality() {
+    protected function getRecipientNationality() : string
+    {
         return 'bulgaria';
     }
 
