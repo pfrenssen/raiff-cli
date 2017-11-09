@@ -306,6 +306,7 @@ abstract class CommandBase extends Command
     protected function waitForElementPresence(string $selector, string $engine = 'css', bool $present = TRUE) : void
     {
         $timeout = 20000000;
+
         if ($engine === 'css') {
             $converter = new CssSelectorConverter();
             $selector = $converter->toXPath($selector);
@@ -338,9 +339,15 @@ abstract class CommandBase extends Command
     protected function waitForElementVisibility(string $selector, string $engine = 'css', bool $visible = TRUE) : void
     {
         $timeout = 20000000;
+
         do {
-            $element = $this->mink->assertSession()->elementExists($engine, $selector);
-            if ($element->isVisible() === $visible) return;
+            $element = $this->session->getPage()->find($engine, $selector);
+            // If the element does not exist and we are waiting for it to
+            // disappear we are done.
+            if (empty($element)) {
+                if (!$visible) return;
+            }
+            elseif ($element->isVisible() === $visible) return;
             usleep(500000);
             $timeout -= 500000;
         } while ($timeout > 0);
