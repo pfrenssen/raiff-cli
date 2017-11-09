@@ -46,8 +46,10 @@ class InLeva extends TransferBase
         $this->clickMainNavigationLink('transfers');
 
         foreach ($transactions as $transaction) {
-            // Click "New transfer".
-            $this->clickSecondaryNavigationLink('New transfer');
+            // Click "New transfer" for corporate accounts, or "Transfer types"
+            // for individual accounts.
+            $link = $account_type === 'corporate' ? 'New transfer' : 'Transfer Types';
+            $this->clickSecondaryNavigationLink($link);
             $this->waitForLinkButtonPresence('In leva');
             // Open the "In leva" payment form.
             $this->clickLinkButton('In leva');
@@ -69,7 +71,6 @@ class InLeva extends TransferBase
             }
 
             // Submit the form.
-            sleep(1);
             $this->clickLinkButton('Save');
             $this->waitForSuccessMessage();
 

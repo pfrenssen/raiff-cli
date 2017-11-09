@@ -56,7 +56,8 @@ class Sign extends CommandBase
         // Navigate to the transfers overview page, waiting a moment for the
         // dynamic page loading to complete.
         $this->clickMainNavigationLink('Transfers');
-        $this->waitForLinkButtonPresence('In leva');
+        $link_text = $account_type === 'corporate' ? 'In leva' : 'Next';
+        $this->waitForLinkButtonPresence($link_text);
         $this->clickSecondaryNavigationLink('Pending');
         $this->waitForElementPresence('//a[contains(@data-bind, "filterToggler")]', 'xpath');
 
