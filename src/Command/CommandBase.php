@@ -434,10 +434,26 @@ abstract class CommandBase extends Command
      * the link text is contained in a set of spans.
      *
      * @param string $link_text
+     *   The link text.
+     *
+     * @throws \Exception
+     *   Thrown when a link button with the given text is not present or not
+     *   visible.
      */
     protected function clickLinkButton(string $link_text) : void
     {
-        $this->session->getPage()->find('xpath', '//button[contains(concat(" ", normalize-space(@class), " "), " btn-primary ") and .//span[normalize-space(text()) = "' . $link_text . '"]]')->click();
+        // It might happen that duplicates of the button exist, for example in
+        // mobile versions, or sticky footers. Loop over all elements that are
+        // found and click on the first one that is visible.
+        $elements = $this->session->getPage()->findAll('xpath', '//button[contains(concat(" ", normalize-space(@class), " "), " btn-primary ") and .//span[normalize-space(text()) = "' . $link_text . '"]]');
+        foreach ($elements as $element) {
+            /** @var \Behat\Mink\Element\NodeElement $element */
+            if ($element->isVisible()) {
+                $element->click();
+                return;
+            }
+        }
+        throw new \Exception('Link button with text "' . $link_text . '" not found, or not visible.');
     }
 
     /**
