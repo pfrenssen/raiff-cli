@@ -519,6 +519,7 @@ abstract class CommandBase extends Command
         if (empty($id) || $page->find('css', '#' . $id)) {
             $page->find('css', 'button.close')->click();
         }
+        $this->waitForElementVisibility('button.close', 'css', FALSE);
     }
 
 }
