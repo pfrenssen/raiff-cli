@@ -370,6 +370,20 @@ abstract class CommandBase extends Command
     }
 
     /**
+     * Waits for the link button with the given text to become (in)visible.
+     *
+     * @param string $link_text
+     *   The link text.
+     * @param bool $visible
+     *   TRUE to wait for the element to become visible, FALSE for it to become
+     *   invisible. Defaults to TRUE.
+     */
+    protected function waitForLinkButtonVisibility(string $link_text, bool $visible = TRUE) : void
+    {
+        $this->waitForElementVisibility('//button[contains(concat(" ", normalize-space(@class), " "), " btn-primary ") and .//span[normalize-space(text()) = "' . $link_text . '"]]', 'xpath', $visible);
+    }
+
+    /**
      * Waits until the "overlay-loading" element disappears.
      */
     protected function waitUntilPageLoaded() : void
