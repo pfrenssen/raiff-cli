@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace RaiffCli\Command\Transfer;
 
 use RaiffCli\Command\CommandBase;
@@ -252,10 +254,12 @@ abstract class TransferBase extends CommandBase
      * @param string $account
      *   The account name, in the format '1234567890 BGN'.
      */
-    protected function chooseAccount($account)
+    protected function chooseAccount(string $account) : void
     {
         // Click "Choose an account from the list".
-        $this->clickLinkButton('Choose an account from the list');
+        $link_text = 'Choose an account from the list';
+        $this->waitForLinkButtonPresence($link_text);
+        $this->clickLinkButton($link_text);
 
         $modal_selector = '//div[@class = "modal-content"]';
         $account_row_selector = $modal_selector . '//tr[@data-selectionmode = "Single" and .//span[text() = "' . $account . '"]]';
