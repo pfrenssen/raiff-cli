@@ -59,7 +59,7 @@ class Sign extends CommandBase
         $link_text = $account_type === 'corporate' ? 'In leva' : 'Next';
         $this->waitForLinkButtonPresence($link_text);
         $this->clickSecondaryNavigationLink('Pending');
-        $this->waitForElementPresence('//a[contains(@data-bind, "filterToggler")]', 'xpath');
+        $this->waitForElementVisibility('//button[contains(concat(" ", normalize-space(@class), " "), " export-xls ")]', 'xpath');
 
         // Check if there are any pending transfers.
         $element = $this->session->getPage()->find('xpath', '//table//tr//span[contains(@data-bind, "Payment.PayerName")]');
