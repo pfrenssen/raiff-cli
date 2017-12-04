@@ -442,6 +442,8 @@ abstract class CommandBase extends Command
      */
     protected function clickLinkButton(string $link_text) : void
     {
+        $this->waitForLinkButtonVisibility($link_text);
+
         // It might happen that duplicates of the button exist, for example in
         // mobile versions, or sticky footers. Loop over all elements that are
         // found and click on the first one that is visible.

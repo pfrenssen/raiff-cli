@@ -50,7 +50,6 @@ class InLeva extends TransferBase
             // for individual accounts.
             $link = $account_type === 'corporate' ? 'New transfer' : 'Transfer Types';
             $this->clickSecondaryNavigationLink($link);
-            $this->waitForLinkButtonPresence('In leva');
             // Open the "In leva" payment form.
             $this->clickLinkButton('In leva');
             $this->waitForElementPresence('.pmt-form');

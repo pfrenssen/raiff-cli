@@ -258,7 +258,6 @@ abstract class TransferBase extends CommandBase
     {
         // Click "Choose an account from the list".
         $link_text = 'Choose an account from the list';
-        $this->waitForLinkButtonPresence($link_text);
         $this->clickLinkButton($link_text);
 
         $modal_selector = '//div[@class = "modal-content"]';
