@@ -420,6 +420,9 @@ abstract class CommandBase extends Command
     {
         $link_text = $this->capitalizeMainNavigationLinkText($link_text);
         $this->session->getPage()->find('xpath', '//nav[contains(@class, "nav-main") and not(contains(@class, "nav-mobile"))]//a[span[@title = "' . $link_text . '"]]')->click();
+
+        // Close the marketing banner if it is present.
+        $this->closeCampaignContent();
     }
 
     protected function clickSecondaryNavigationLink(string $link_text) : void
