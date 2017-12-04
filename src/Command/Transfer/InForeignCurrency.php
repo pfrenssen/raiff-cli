@@ -40,37 +40,42 @@ class InForeignCurrency extends TransferBase
         // Choose between individual and corporate account.
         $this->selectAccountType($account_type);
 
-        // Start from the homepage.
-        $this->navigateToHomepage();
+        // Start from the Transfers page.
+        $this->clickMainNavigationLink('transfers');
 
         foreach ($transactions as $transaction) {
+            // Click "New transfer" for corporate accounts, or "Transfer types"
+            // for individual accounts.
+            $link = $account_type === 'corporate' ? 'New transfer' : 'Transfer Types';
+            $this->clickSecondaryNavigationLink($link);
             // Open the "In foreign currency" payment form.
-            $this->waitForElementPresence('#NewPaymentTypes');
-            $this->session->getPage()->clickLink('In foreign currency');
+            $this->clickLinkButton('In foreign currency');
 
             // Choose the account.
             $this->chooseAccount($account);
 
             // Fill in the fields.
-            $this->waitForElementPresence('#PayeeName');
-            $this->session->getPage()->fillField('Document.PayeeName', $transaction['recipient']['name']);
-            $this->session->getPage()->fillField('Document.PayeeAccountNumber', $transaction['recipient']['iban']);
-            $this->session->getPage()->fillField('Document.PayeeAddress', $transaction['recipient']['address']);
-            $this->session->getPage()->fillField('Document.PayeeBankSWIFT', $transaction['recipient']['bic']);
-            $this->session->getPage()->fillField('Document.Amount', $transaction['amount']);
-            $this->session->getPage()->fillField('Document.Description', $transaction['description']);
+            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_PayeeName', $transaction['recipient']['name']);
+            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_PayeeAccountNumber', $transaction['recipient']['iban']);
+            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_PayeeAddress', $transaction['recipient']['address']);
+            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_PayeeBankSWIFT', $transaction['recipient']['bic']);
+            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_Amount', $transaction['amount']);
+            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_Description', $transaction['description']);
 
             // Select the currency.
             // @todo Support currencies other than EUR.
-            $this->session->getPage()->findById('CCYPicker-button')->click();
-            $this->session->getPage()->clickLink('EUR');
+            $element = $this->session->getPage()->findById('id_Model_GenericPayment_Document_SelectedCCY');
+            // @todo This doesn't work, probably because there are no values
+            //   associated with the options.
+            $element->selectOption('EUR');
 
             // Select the country.
             // @todo Support countries other than Belgium.
-            $this->session->getPage()->selectFieldOption('Document.PayeeBankCountryPicker', '056');
+            $this->session->getPage()->selectFieldOption('id_Model_GenericPayment_Document_Model_PayeeBankCountryCode', '056');
 
             // Select the operation type.
             // @todo Support other operation types.
+            throw new \Exception(__METHOD__ . ' needs to be completely ported.');
             $this->session->getPage()->findById('FCCYOpCodeSelector')->click();
             // The operation type dialog box doesn't have an identifier. Nice.
             $operation_type_select_xpath = '//div[@aria-labelledby="ui-dialog-title-1"]/div/fieldset[@class="col1"]/div[@class="column"][1]/select';
