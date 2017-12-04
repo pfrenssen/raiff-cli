@@ -415,6 +415,9 @@ abstract class CommandBase extends Command
      *
      * @param string $link_text
      *   The link text to click.
+     *
+     * @throws \Exception
+     *   Thrown when an unknown link text is being passed.
      */
     protected function clickMainNavigationLink(string $link_text) : void
     {
@@ -425,6 +428,12 @@ abstract class CommandBase extends Command
         $this->closeCampaignContent();
     }
 
+    /**
+     * Clicks the link with given link text in the secondary navigation menu.
+     *
+     * @param string $link_text
+     *   The link text to click.
+     */
     protected function clickSecondaryNavigationLink(string $link_text) : void
     {
         $this->session->getPage()->find('xpath', '//ul[contains(concat(" ", normalize-space(@class), " "), " nav-tabs ")]//a[span[@title = "' . $link_text . '"]]')->click();
@@ -516,6 +525,8 @@ abstract class CommandBase extends Command
      *
      * @param string $account_type
      *   The account type, either 'individual' or 'corporate'.
+     *
+     * @throws \Exception
      */
     protected function selectAccountType(string $account_type) : void
     {
