@@ -351,7 +351,7 @@ abstract class CommandBase extends Command
             // It might happen that duplicates of the element exist, for example
             // in mobile versions, or sticky footers. Loop over all elements
             // that are found and report if any of them are visible.
-            elseif (array_reduce($elements, function (bool $carry, NodeElement $element) {
+            elseif (array_reduce($elements, function (bool $carry, NodeElement $element) : bool {
                 return $carry || $element->isVisible();
             }, FALSE) === $visible) return;
             usleep(500000);
