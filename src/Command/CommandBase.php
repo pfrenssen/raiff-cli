@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace RaiffCli\Command;
 
 use Behat\Mink\Driver\Selenium2Driver;
+use Behat\Mink\Element\NodeElement;
 use Behat\Mink\Mink;
 use Behat\Mink\Session;
 use RaiffCli\Config\ConfigManager;
@@ -326,7 +327,7 @@ abstract class CommandBase extends Command
      * Waits for the given element to become (in)visible.
      *
      * @param string $selector
-     *   The CSS selector identifying the element.
+     *   The selector identifying the element.
      * @param string $engine
      *   The selector engine name, either 'css' or 'xpath'. Defaults to 'css'.
      * @param bool $visible
@@ -341,13 +342,18 @@ abstract class CommandBase extends Command
         $timeout = 20000000;
 
         do {
-            $element = $this->session->getPage()->find($engine, $selector);
+            $elements = $this->session->getPage()->findAll($engine, $selector);
             // If the element does not exist and we are waiting for it to
             // disappear we are done.
-            if (empty($element)) {
+            if (empty($elements)) {
                 if (!$visible) return;
             }
-            elseif ($element->isVisible() === $visible) return;
+            // It might happen that duplicates of the element exist, for example
+            // in mobile versions, or sticky footers. Loop over all elements
+            // that are found and report if any of them are visible.
+            elseif (array_reduce($elements, function (bool $carry, NodeElement $element) {
+                return $carry || $element->isVisible();
+            }, FALSE) === $visible) return;
             usleep(500000);
             $timeout -= 500000;
         } while ($timeout > 0);
