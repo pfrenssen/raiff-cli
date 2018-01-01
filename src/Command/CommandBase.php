@@ -16,6 +16,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\CssSelector\CssSelectorConverter;
+use WebDriver\Exception\StaleElementReference;
 use Zumba\Mink\Driver\PhantomJSDriver;
 
 /**
@@ -352,7 +353,13 @@ abstract class CommandBase extends Command
             // in mobile versions, or sticky footers. Loop over all elements
             // that are found and report if any of them are visible.
             elseif (array_reduce($elements, function (bool $carry, NodeElement $element) : bool {
-                return $carry || $element->isVisible();
+                try {
+                    $visible = $element->isVisible();
+                } catch (StaleElementReference $e) {
+                    // The element might have disappeared from the DOM.
+                    $visible = FALSE;
+                }
+                return $carry || $visible;
             }, FALSE) === $visible) return;
             usleep(500000);
             $timeout -= 500000;
