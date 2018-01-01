@@ -285,7 +285,7 @@ abstract class TransferBase extends CommandBase
      *   Can be either 'bulgaria' or 'foreign'. Leave empty to allow recipients
      *   of all nationalities.
      */
-    protected function getRecipientNationality()
+    protected function getRecipientNationality(): string
     {
         return '';
     }

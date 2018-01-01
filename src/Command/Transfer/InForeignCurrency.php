@@ -4,6 +4,7 @@ namespace RaiffCli\Command\Transfer;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use WebDriver\Exception\UnknownError;
 
 /**
  * Console command to execute a transaction in foreign currency.
@@ -41,15 +42,29 @@ class InForeignCurrency extends TransferBase
         $this->selectAccountType($account_type);
 
         // Start from the Transfers page.
-        $this->clickMainNavigationLink('transfers');
+        $this->clickMainNavigationLink('Transfers');
 
         foreach ($transactions as $transaction) {
             // Click "New transfer" for corporate accounts, or "Transfer types"
             // for individual accounts.
             $link = $account_type === 'corporate' ? 'New transfer' : 'Transfer Types';
-            $this->clickSecondaryNavigationLink($link);
+            try {
+                $this->clickSecondaryNavigationLink($link);
+            } catch (UnknownError $e) {
+                // @todo At this point the following error might occur:
+                //   'Element "#CreatePayment/Index" is not clickable at point
+                //   (536, 204). Other element would receive the click: <div
+                //   class="overlay-loading">...</div>'
+                //   This overlay appears only rarely. I haven't seen it in the
+                //   browser yet so I don't know its markup. Let's try closing
+                //   any possible dialog that might be on the page.
+                $this->closeDialog();
+                $this->clickSecondaryNavigationLink($link);
+            }
+
             // Open the "In foreign currency" payment form.
             $this->clickLinkButton('In foreign currency');
+            $this->waitForElementPresence('.pmt-form');
 
             // Choose the account.
             $this->chooseAccount($account);
@@ -64,10 +79,7 @@ class InForeignCurrency extends TransferBase
 
             // Select the currency.
             // @todo Support currencies other than EUR.
-            $element = $this->session->getPage()->findById('id_Model_GenericPayment_Document_SelectedCCY');
-            // @todo This doesn't work, probably because there are no values
-            //   associated with the options.
-            $element->selectOption('EUR');
+            $this->selectOptionByElementText('id_Model_GenericPayment_Document_SelectedCCY', 'EUR');
 
             // Select the country.
             // @todo Support countries other than Belgium.
@@ -75,21 +87,13 @@ class InForeignCurrency extends TransferBase
 
             // Select the operation type.
             // @todo Support other operation types.
-            throw new \Exception(__METHOD__ . ' needs to be completely ported.');
-            $this->session->getPage()->findById('FCCYOpCodeSelector')->click();
-            // The operation type dialog box doesn't have an identifier. Nice.
-            $operation_type_select_xpath = '//div[@aria-labelledby="ui-dialog-title-1"]/div/fieldset[@class="col1"]/div[@class="column"][1]/select';
-            $this->waitForElementPresence($operation_type_select_xpath, 'xpath');
+            $this->selectOptionByElementText('id_Model_OpCodeBNBInfo_SelectedOpMode', 'Transfers');
             // @todo Support other operations than "Other private transfers".
-            $this->session->getPage()->find('xpath', $operation_type_select_xpath)->selectOption('4');
-            $this->waitForElementPresence('#OpCodePick');
-            $this->session->getPage()->selectFieldOption('OpCodePick', '629');
-            $this->session->getPage()->find('xpath', '//div[@aria-labelledby="ui-dialog-title-1"]/div/div/button')->click();
+            $this->selectOptionByElementText('id_Model_OpCodeBNBInfo_SelectedOpCode', 'Other private transfers');
 
             // Submit the form.
-            sleep(1);
-            $this->session->getPage()->findById('btnSave')->click();
-            $this->waitForElementPresence('#SaveOKResultHolder');
+            $this->clickLinkButton('Save');
+            $this->waitForSuccessMessage();
 
             // The transaction succeeded. Remove it from the disk cache.
             $this->deleteStoredTransaction($transaction);
@@ -102,7 +106,8 @@ class InForeignCurrency extends TransferBase
     /**
      * {@inheritdoc}
      */
-    protected function getRecipientNationality() {
+    protected function getRecipientNationality(): string
+    {
         return 'foreign';
     }
 

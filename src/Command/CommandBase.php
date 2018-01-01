@@ -492,6 +492,35 @@ abstract class CommandBase extends Command
     }
 
     /**
+     * Selects the option with the given element text in the given select box.
+     *
+     * Some of the select boxes in the Raiffeisen website have option elements
+     * with empty 'value' properties.
+     * According to the HTML5 specification the element text should be used as
+     * the value if the 'value' property is not present. The website violates
+     * the standard by having a 'value' property present and not setting the
+     * value.
+     *
+     * @see https://w3c.github.io/html/sec-forms.html#the-option-element
+     *
+     * This method works around this violation by finding the option to be
+     * selected using the element text and forcing a click on it.
+     *
+     * @param string $select_id
+     *   The ID of the select box.
+     * @param string $element_text
+     *   The element text of the option that should be selected.
+     */
+    protected function selectOptionByElementText(string $select_id, string $element_text): void
+    {
+        $select_element = $this->session->getPage()->findById($select_id);
+        $option_element = $select_element->find('named', array('option', $element_text));
+        if (!$option_element->isSelected()) {
+            $option_element->click();
+        }
+    }
+
+    /**
      * Return the main navigation link in the correct capitalization.
      *
      * The navigation link text is inconsistently capitalized.
