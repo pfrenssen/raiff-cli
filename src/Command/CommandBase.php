@@ -376,6 +376,10 @@ abstract class CommandBase extends Command
      * @param bool $present
      *   TRUE to wait for the element to appear, FALSE for it to disappear.
      *   Defaults to TRUE.
+     *
+     * @throws \Exception
+     *   Thrown when the link button doesn't appear or disappear within 20
+     *   seconds.
      */
     protected function waitForLinkButtonPresence(string $link_text, bool $present = TRUE) : void
     {
@@ -390,6 +394,10 @@ abstract class CommandBase extends Command
      * @param bool $visible
      *   TRUE to wait for the element to become visible, FALSE for it to become
      *   invisible. Defaults to TRUE.
+     *
+     * @throws \Exception
+     *   Thrown when the link button doesn't become (in)visible within 20
+     *   seconds.
      */
     protected function waitForLinkButtonVisibility(string $link_text, bool $visible = TRUE) : void
     {
