@@ -563,7 +563,8 @@ abstract class CommandBase extends Command
         $config = $this->getConfigManager()->get('config');
         $base_url = $config->get('base_url');
         $this->session->visit($base_url);
-        $this->closeSecurityWarning();
+        // A dialog containing information or a security warning might be shown.
+        $this->closeDialog();
         $this->session->getPage()->fillField('id_Model_UserName', $config->get('credentials.username'));
         $this->session->getPage()->fillField('id_Model_Password', $config->get('credentials.password'));
         $this->session->getPage()->find('css', '.btn-login')->click();
