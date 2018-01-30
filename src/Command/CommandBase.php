@@ -614,9 +614,16 @@ abstract class CommandBase extends Command
     {
         $page = $this->session->getPage();
         if (empty($id) || $page->find('css', '#' . $id)) {
-            $page->find('css', 'button.close')->click();
+            $close_button = $page->find('css', 'button.close');
+            if (!empty($close_button)) {
+                $close_button->click();
+            }
         }
-        $this->waitForElementVisibility('button.close', 'css', FALSE);
+        try {
+            $this->waitForElementVisibility('button.close', 'css', FALSE);
+        } catch (\Exception $e) {
+            throw new \RuntimeException('Attempted to close dialog but it did not disappear.', 0, $e);
+        }
     }
 
 }
