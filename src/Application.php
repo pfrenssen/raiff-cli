@@ -16,7 +16,7 @@ class Application extends ConsoleApplication
     }
 
     /**
-     * @return \RaiffCli\Config
+     * @return \RaiffCli\Config\Config
      */
     public function getConfig()
     {
