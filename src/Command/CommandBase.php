@@ -263,9 +263,9 @@ abstract class CommandBase extends Command
      * @throws \InvalidArgumentException
      *   Thrown when the input is empty.
      */
-    public static function requiredValidator(string $input) : string
+    public static function requiredValidator(string $input = NULL) : string
     {
-        if (empty(trim($input))) {
+        if (empty($input) || empty(trim($input))) {
             throw new \InvalidArgumentException('Please enter a value.');
         }
         return $input;
