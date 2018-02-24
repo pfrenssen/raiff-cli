@@ -17,6 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\CssSelector\CssSelectorConverter;
 use WebDriver\Exception\StaleElementReference;
+use WebDriver\Exception\UnknownError;
 use Zumba\Mink\Driver\PhantomJSDriver;
 
 /**
@@ -563,12 +564,23 @@ abstract class CommandBase extends Command
         $config = $this->getConfigManager()->get('config');
         $base_url = $config->get('base_url');
         $this->session->visit($base_url);
-        // A dialog containing information or a security warning might be shown.
-        $this->closeDialog();
-        $this->session->getPage()->fillField('id_Model_UserName', $config->get('credentials.username'));
-        $this->session->getPage()->fillField('id_Model_Password', $config->get('credentials.password'));
-        $this->session->getPage()->find('css', '.btn-login')->click();
-        $this->waitForElementPresence('.profile-selection');
+        // A dialog containing information or a security warning might suddenly pop up during the login procedure,
+        // obscuring the form fields. If this happens an UnknownError is thrown.
+        $attempts = 0;
+        do {
+            try {
+                $this->session->getPage()->fillField('id_Model_UserName', $config->get('credentials.username'));
+                $this->session->getPage()->fillField('id_Model_Password', $config->get('credentials.password'));
+                $this->session->getPage()->find('css', '.btn-login')->click();
+                $this->waitForElementPresence('.profile-selection');
+                return;
+            }
+            catch (UnknownError $e) {
+                $this->closeDialog();
+            }
+        }
+        while (++$attempts < 3);
+        throw new \RuntimeException('Unable to log in after 3 attempts.');
     }
 
     /**
