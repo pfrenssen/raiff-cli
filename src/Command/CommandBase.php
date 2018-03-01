@@ -577,6 +577,7 @@ abstract class CommandBase extends Command
                 return;
             }
             catch (UnknownError $e) {
+                // This exception is thrown when an element cannot be clicked because it is obscured by a dialog.
                 $this->closeDialog();
             }
         }
