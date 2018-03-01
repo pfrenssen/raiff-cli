@@ -565,10 +565,11 @@ abstract class CommandBase extends Command
         $base_url = $config->get('base_url');
         $this->session->visit($base_url);
         // A dialog containing information or a security warning might suddenly pop up during the login procedure,
-        // obscuring the form fields. If this happens an UnknownError is thrown.
+        // obscuring the form fields. If this happens, try to log in again.
         $attempts = 0;
         do {
             try {
+                $this->waitForElementPresence('#id_Model_UserName');
                 $this->session->getPage()->fillField('id_Model_UserName', $config->get('credentials.username'));
                 $this->session->getPage()->fillField('id_Model_Password', $config->get('credentials.password'));
                 $this->session->getPage()->find('css', '.btn-login')->click();
