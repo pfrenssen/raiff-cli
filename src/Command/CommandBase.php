@@ -444,10 +444,21 @@ abstract class CommandBase extends Command
     protected function clickMainNavigationLink(string $link_text) : void
     {
         $link_text = $this->capitalizeMainNavigationLinkText($link_text);
-        $this->session->getPage()->find('xpath', '//nav[contains(@class, "nav-main") and not(contains(@class, "nav-mobile"))]//a[span[@title = "' . $link_text . '"]]')->click();
-
-        // Close the marketing banner if it is present.
-        $this->closeCampaignContent();
+        // A marketing banner might appear at any time. Retry a couple of times if this happens.
+        $attempts = 0;
+        do {
+            try {
+                $this->session->getPage()->find('xpath', '//nav[contains(@class, "nav-main") and not(contains(@class, "nav-mobile"))]//a[span[@title = "' . $link_text . '"]]')->click();
+                return;
+            }
+            catch (UnknownError $e) {
+                // This exception is thrown when an element cannot be clicked because it is obscured by another element
+                // (such as a dialog).
+                $this->closeDialog();
+            }
+        }
+        while (++$attempts < 3);
+        throw new \RuntimeException('Unable to click main navigation link after 3 attempts.', 0, $e);
     }
 
     /**
