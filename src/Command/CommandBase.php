@@ -6,9 +6,12 @@ namespace RaiffCli\Command;
 
 use Behat\Mink\Driver\Selenium2Driver;
 use Behat\Mink\Element\NodeElement;
+use Behat\Mink\Exception\DriverException;
 use Behat\Mink\Mink;
 use Behat\Mink\Session;
 use RaiffCli\Config\ConfigManager;
+use RaiffCli\Exception\ElementPresenceException;
+use RaiffCli\Exception\ElementVisibilityException;
 use RaiffCli\Helper\ContainerHelper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -302,27 +305,32 @@ abstract class CommandBase extends Command
      * @param bool $present
      *   TRUE to wait for the element to appear, FALSE for it to disappear.
      *   Defaults to TRUE.
+     * @param int $timeout
+     *   The time to wait for the element to appear or disappear, in microseconds. Defaults to 20 seconds.
      *
-     * @throws \Exception
-     *   Thrown when the element doesn't appear or disappear within 20 seconds.
+     * @throws ElementPresenceException
+     *   Thrown when the element doesn't appear or disappear within the given timeout.
      */
-    protected function waitForElementPresence(string $selector, string $engine = 'css', bool $present = TRUE) : void
+    protected function waitForElementPresence(string $selector, string $engine = 'css', bool $present = TRUE, int $timeout = 20000000) : void
     {
-        $timeout = 20000000;
-
         if ($engine === 'css') {
             $converter = new CssSelectorConverter();
             $selector = $converter->toXPath($selector);
         }
 
         do {
-            $element = $this->session->getDriver()->find($selector);
+            try {
+                $element = $this->session->getDriver()->find($selector);
+            }
+            catch (DriverException $e) {
+                throw new \RuntimeException("An error occurred while attempting to retrieve the element with selector $selector", 0, $e);
+            }
             if (!empty($element) === $present) return;
             usleep(500000);
             $timeout -= 500000;
         } while ($timeout > 0);
 
-        throw new \Exception("The element with selector '$selector' is " . ($present ? 'not ' : '') . 'present on the page.');
+        throw new ElementPresenceException("The element with selector '$selector' is " . ($present ? 'not ' : '') . 'present on the page.');
     }
 
     /**
@@ -335,14 +343,14 @@ abstract class CommandBase extends Command
      * @param bool $visible
      *   TRUE to wait for the element to become visible, FALSE for it to become
      *   invisible. Defaults to TRUE.
+     * @param int $timeout
+     *   The time to wait for the element to become (in)visible, in microseconds. Defaults to 20 seconds.
      *
-     * @throws \Exception
-     *   Thrown when the element doesn't become (in)visible within 20 seconds.
+     * @throws ElementVisibilityException
+     *   Thrown when the element doesn't become (in)visible within the given timeout.
      */
-    protected function waitForElementVisibility(string $selector, string $engine = 'css', bool $visible = TRUE) : void
+    protected function waitForElementVisibility(string $selector, string $engine = 'css', bool $visible = TRUE, int $timeout = 20000000) : void
     {
-        $timeout = 20000000;
-
         do {
             $elements = $this->session->getPage()->findAll($engine, $selector);
             // If the element does not exist and we are waiting for it to
@@ -366,7 +374,7 @@ abstract class CommandBase extends Command
             $timeout -= 500000;
         } while ($timeout > 0);
 
-        throw new \Exception("The element with selector '$selector' is " . ($visible ? 'not ' : '') . 'visible on the page.');
+        throw new ElementVisibilityException("The element with selector '$selector' is " . ($visible ? 'not ' : '') . 'visible on the page.');
     }
 
     /**
@@ -377,14 +385,15 @@ abstract class CommandBase extends Command
      * @param bool $present
      *   TRUE to wait for the element to appear, FALSE for it to disappear.
      *   Defaults to TRUE.
+     * @param int $timeout
+     *   The time to wait for the element to become present, in microseconds. Defaults to 20 seconds.
      *
-     * @throws \Exception
-     *   Thrown when the link button doesn't appear or disappear within 20
-     *   seconds.
+     * @throws ElementPresenceException
+     *   Thrown when the link button doesn't appear or disappear within the given timeout.
      */
-    protected function waitForLinkButtonPresence(string $link_text, bool $present = TRUE) : void
+    protected function waitForLinkButtonPresence(string $link_text, bool $present = TRUE, int $timeout = 20000000) : void
     {
-        $this->waitForElementPresence('//button[contains(concat(" ", normalize-space(@class), " "), " btn-primary ") and .//span[normalize-space(text()) = "' . $link_text . '"]]', 'xpath', $present);
+        $this->waitForElementPresence('//button[contains(concat(" ", normalize-space(@class), " "), " btn-primary ") and .//span[normalize-space(text()) = "' . $link_text . '"]]', 'xpath', $present, $timeout);
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace RaiffCli\Command\Transfer;
 
+use RaiffCli\Exception\ElementPresenceException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -49,7 +50,19 @@ class InLeva extends TransferBase
             // Click "New transfer" for corporate accounts, or "Transfer types"
             // for individual accounts.
             $link = $account_type === 'corporate' ? 'New transfer' : 'Transfer Types';
-            $this->clickSecondaryNavigationLink($link);
+
+            // The navigation links do not immediately work after they appear. Retry a few times if the page doesn't
+            // change after clicking it.
+            $attempts = 0;
+            do {
+                try {
+                    $this->clickSecondaryNavigationLink($link);
+                    $this->waitForLinkButtonPresence('In leva', TRUE, 1000000);
+                    break;
+                }
+                catch (ElementPresenceException $e) {}
+            }
+            while (++$attempts < 3);
 
             // Open the "In leva" payment form.
             $this->clickLinkButton('In leva');
