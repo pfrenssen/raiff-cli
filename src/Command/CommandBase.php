@@ -19,6 +19,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\CssSelector\CssSelectorConverter;
+use WebDriver\Exception\ElementNotVisible;
 use WebDriver\Exception\StaleElementReference;
 use WebDriver\Exception\UnknownError;
 use Zumba\Mink\Driver\PhantomJSDriver;
@@ -650,7 +651,18 @@ abstract class CommandBase extends Command
         if (empty($id) || $page->find('css', '#' . $id)) {
             $close_button = $page->find('css', 'button.close');
             if (!empty($close_button)) {
-                $close_button->click();
+                // The close button might be present on the page but not yet clickable since it is fading in.
+                $attempts = 0;
+                do {
+                    try {
+                        $close_button->click();
+                        break;
+                    }
+                    catch (ElementNotVisible $e) {
+                        usleep(500000);
+                    }
+                }
+                while (++$attempts < 3);
             }
         }
         try {
