@@ -662,13 +662,14 @@ abstract class CommandBase extends Command
                         usleep(500000);
                     }
                 }
-                while (++$attempts < 3);
+                while (++$attempts < 6);
+                // Now wait for the dialog to fade out.
+                try {
+                    $this->waitForElementVisibility('button.close', 'css', FALSE);
+                } catch (\Exception $e) {
+                    throw new \RuntimeException('Attempted to close dialog but it did not disappear.', 0, $e);
+                }
             }
-        }
-        try {
-            $this->waitForElementVisibility('button.close', 'css', FALSE);
-        } catch (\Exception $e) {
-            throw new \RuntimeException('Attempted to close dialog but it did not disappear.', 0, $e);
         }
     }
 
