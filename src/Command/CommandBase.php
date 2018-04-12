@@ -616,6 +616,10 @@ abstract class CommandBase extends Command
      */
     protected function selectAccountType(string $account_type) : void
     {
+        // It is possible that the buttons are already present but their click handlers are not active yet. Wait for the
+        // user name to appear in the navigation bar, this seems to coincide with the click handlers becoming active.
+        $this->waitForElementPresence('//nav[contains(concat(" ", @class, " "), " navbar ")]//li[contains(concat(" ", @class, " "), " nav-item-user ")]//span[contains(concat(" ", @class, " "), " item-label ")]', 'xpath');
+
         $selector = '//button[contains(@data-bind, "' . $account_type . '")]';
         $this->session->getPage()->find('xpath', $selector)->click();
         $this->waitForElementPresence('//nav[contains(@class, "nav-main") and not(contains(@class, "nav-mobile"))]', 'xpath');
