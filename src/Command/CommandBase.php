@@ -684,7 +684,8 @@ abstract class CommandBase extends Command
         if (empty($id) || $page->find('css', '#' . $id)) {
             $close_button = $page->find('css', 'button.close');
             if (!empty($close_button)) {
-                // The close button might be present on the page but not yet clickable since it is fading in.
+                // The close button might be present on the page but not yet
+                // clickable since it is fading in.
                 $attempts = 0;
                 do {
                     try {
@@ -693,6 +694,12 @@ abstract class CommandBase extends Command
                     }
                     catch (ElementNotVisible $e) {
                         usleep(500000);
+                    }
+                    catch (NoSuchElement $e) {
+                        // The close button has disappeared from the DOM while
+                        // we were interacting with it. We're assuming the
+                        // dialog has disappeared.
+                        break;
                     }
                 }
                 while (++$attempts < 6);
