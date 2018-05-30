@@ -369,6 +369,9 @@ abstract class CommandBase extends Command
                 } catch (StaleElementReference $e) {
                     // The element might have disappeared from the DOM.
                     $visible = FALSE;
+                } catch (NoSuchElement $e) {
+                    // The element might have disappeared from the DOM.
+                    $visible = FALSE;
                 }
                 return $carry || $visible;
             }, FALSE) === $visible) return;
