@@ -476,10 +476,20 @@ abstract class CommandBase extends Command
      *
      * @param string $link_text
      *   The link text to click.
+     *
+     * @throws ElementPresenceException
+     *   Thrown when the link is not present on the page.
      */
     protected function clickSecondaryNavigationLink(string $link_text) : void
     {
-        $this->session->getPage()->find('xpath', '//ul[contains(concat(" ", normalize-space(@class), " "), " nav-tabs ")]//a[span[@title = "' . $link_text . '"]]')->click();
+        $locator = '//ul[contains(concat(" ", normalize-space(@class), " "), " nav-tabs ")]//a[span[@title = "' . $link_text . '"]]';
+        $element = $this->session->getPage()->find('xpath', $locator);
+
+        if (empty($element)) {
+            throw new ElementPresenceException("The secondary navigation link with text '$link_text' is not present on the page.");
+        }
+
+        $element->click();
     }
 
     /**
