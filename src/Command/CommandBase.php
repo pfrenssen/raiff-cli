@@ -20,6 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\CssSelector\CssSelectorConverter;
 use WebDriver\Exception\ElementNotVisible;
+use WebDriver\Exception\NoSuchElement;
 use WebDriver\Exception\StaleElementReference;
 use WebDriver\Exception\UnknownError;
 use Zumba\Mink\Driver\PhantomJSDriver;
@@ -509,17 +510,32 @@ abstract class CommandBase extends Command
     {
         $this->waitForLinkButtonVisibility($link_text);
 
-        // It might happen that duplicates of the button exist, for example in
-        // mobile versions, or sticky footers. Loop over all elements that are
-        // found and click on the first one that is visible.
-        $elements = $this->session->getPage()->findAll('xpath', '//button[contains(concat(" ", normalize-space(@class), " "), " btn-primary ") and .//span[normalize-space(text()) = "' . $link_text . '"]]');
-        foreach ($elements as $element) {
-            /** @var \Behat\Mink\Element\NodeElement $element */
-            if ($element->isVisible()) {
-                $element->click();
-                return;
+        // The contents of the page might change at any time, causing elements
+        // to become stale. If this happens, restart the process with freshly
+        // fetched elements.
+        $attempts = 0;
+        do {
+            try {
+                // It might happen that duplicates of the button exist, for
+                // example in mobile versions, or sticky footers. Loop over all
+                // elements that are found and click on the first one that is
+                // visible.
+                $elements = $this->session->getPage()->findAll('xpath', '//button[contains(concat(" ", normalize-space(@class), " "), " btn-primary ") and .//span[normalize-space(text()) = "' . $link_text . '"]]');
+                foreach ($elements as $element) {
+                    /** @var \Behat\Mink\Element\NodeElement $element */
+                    if ($element->isVisible()) {
+                        $element->click();
+                        return;
+                    }
+                }
+            } catch (NoSuchElement $e) {
+                // The element we're interacting with has become stale. This
+                // means the page has changed in the meantime. Restart the
+                // process with fresh elements.
             }
         }
+        while (++$attempts < 3);
+
         throw new \Exception('Link button with text "' . $link_text . '" not found, or not visible.');
     }
 
