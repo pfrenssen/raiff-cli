@@ -11,6 +11,7 @@ use Behat\Mink\Mink;
 use Behat\Mink\Session;
 use RaiffCli\Config\ConfigManager;
 use RaiffCli\Exception\ElementPresenceException;
+use RaiffCli\Exception\ElementViewModelException;
 use RaiffCli\Exception\ElementVisibilityException;
 use RaiffCli\Helper\ContainerHelper;
 use Symfony\Component\Console\Command\Command;
@@ -436,6 +437,74 @@ abstract class CommandBase extends Command
     }
 
     /**
+     * Waits for the given element to receive the given Knockout view model.
+     *
+     * @param string $selector
+     *   The selector identifying the element.
+     * @param string $engine
+     *   The selector engine name, either 'css' or 'xpath'. Defaults to 'css'.
+     * @param string $view_model
+     *   The view model that is expected to be bound to the element.
+     * @param int $timeout
+     *   The time to wait for the element to appear or disappear, in microseconds. Defaults to 20 seconds.
+     *
+     * @throws ElementViewModelException
+     *   Thrown when the element doesn't receive the expected view model.
+     */
+    protected function waitForElementViewModel(string $selector, string $engine, string $view_model, int $timeout = 20000000): void
+    {
+        $xpath = $this->getXPathFromSelector($selector, $engine);
+
+        $condition = <<<JS
+            (function() {
+                function getElementByXPath(xpath) {
+                    return document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                }
+                element = getElementByXPath('$xpath');
+
+                // Wait for RequireJS to load the Knockout module.
+                require(['knockout'], function(ko) {});
+
+                // Bail out if the element doesn't exist or has no view model bound to it.
+                if (!element || !(data = require('knockout').dataFor(element))) {
+                    return false;
+                }
+
+                return data.constructor.name === '$view_model';
+            }());
+JS;
+
+        $result = $this->session->wait($timeout, $condition);
+
+        if (!$result) {
+            throw new ElementViewModelException("The element with selector '$selector' does not have the '$view_model' view model.");
+        }
+    }
+
+    /**
+     * Returns the XPath selector for the element that matches the given selector and engine.
+     *
+     * This is intended to get an XPath selector, regardless whether the XPath or CSS engines are used.
+     * Note that this depends on the element that is being selected already being present in the page.
+     *
+     * @param string $selector
+     *   The selector identifying the element.
+     * @param string $engine
+     *   The selector engine name, either 'css' or 'xpath'.
+     *
+     * @return string
+     *   The XPath selector that identifies the element.
+     */
+    protected function getXPathFromSelector(string $selector, string $engine): string
+    {
+        if ($engine === 'xpath') {
+            return $selector;
+        }
+        $element = $this->session->getPage()->find($engine, $selector);
+        return $element->getXpath();
+    }
+
+    /**
      * Visits the homepage.
      */
     protected function navigateToHomepage() : void
@@ -645,13 +714,14 @@ abstract class CommandBase extends Command
      */
     protected function selectAccountType(string $account_type) : void
     {
-        // It is possible that the buttons are already present but their click handlers are not active yet. Wait for the
-        // user name to appear in the navigation bar, this seems to coincide with the click handlers becoming active.
-        $this->waitForElementPresence('//nav[contains(concat(" ", @class, " "), " navbar ")]//li[contains(concat(" ", @class, " "), " nav-item-user ")]//span[contains(concat(" ", @class, " "), " item-label ")]', 'xpath');
-
         $selector = '//button[contains(@data-bind, "' . $account_type . '")]';
+
+        // It is possible that the buttons are already present but their click handlers are not bound yet.
+        $this->waitForElementViewModel($selector, 'xpath', 'ChooseThemeViewModel');
+
         $this->session->getPage()->find('xpath', $selector)->click();
         $this->waitForElementPresence('//nav[contains(@class, "nav-main") and not(contains(@class, "nav-mobile"))]', 'xpath');
+
         // Close the marketing banner if it is present.
         $this->closeCampaignContent();
     }
