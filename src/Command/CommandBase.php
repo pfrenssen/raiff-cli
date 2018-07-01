@@ -460,12 +460,14 @@ abstract class CommandBase extends Command
                 function getElementByXPath(xpath) {
                     return document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
                 }
-                element = getElementByXPath('$xpath');
 
-                // Wait for RequireJS to load the Knockout module.
-                require(['knockout'], function(ko) {});
+                // Bail out if Knockout isn't loaded yet by RequireJS.
+                if (!require.s.contexts._.defined.knockout) {
+                    return false;
+                }
 
                 // Bail out if the element doesn't exist or has no view model bound to it.
+                element = getElementByXPath('$xpath');
                 if (!element || !(data = require('knockout').dataFor(element))) {
                     return false;
                 }
