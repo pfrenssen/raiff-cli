@@ -62,7 +62,11 @@ class InForeignCurrency extends TransferBase
                 $this->clickSecondaryNavigationLink($link);
             }
 
-            // Open the "In foreign currency" payment form.
+            // Open the "In foreign currency" payment form, after waiting for
+            // the view model to be bound to the button. Foreign currency
+            // transactions are identified by the string "DocFCCYInfo".
+            $selector = '//button[contains(@data-bind, "DocFCCYInfo")]';
+            $this->waitForElementViewModel($selector, 'xpath', 'IndexViewModel');
             $this->clickLinkButton('In foreign currency');
             $this->waitForElementPresence('.pmt-form');
 
