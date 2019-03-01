@@ -558,13 +558,28 @@ JS;
     protected function clickSecondaryNavigationLink(string $link_text) : void
     {
         $locator = '//ul[contains(concat(" ", normalize-space(@class), " "), " nav-tabs ")]//a[span[@title = "' . $link_text . '"]]';
-        $element = $this->session->getPage()->find('xpath', $locator);
+        // A marketing banner might appear at any time. Retry a couple of times if this happens.
+        $attempts = 0;
+        do {
+            try {
+                $element = $this->session->getPage()->find('xpath', $locator);
 
-        if (empty($element)) {
-            throw new ElementPresenceException("The secondary navigation link with text '$link_text' is not present on the page.");
+                if (empty($element)) {
+                    throw new ElementPresenceException("The secondary navigation link with text '$link_text' is not present on the page.");
+                }
+
+                $element->click();
+                return;
+            }
+            catch (UnknownError $e) {
+                // This exception is thrown when an element cannot be clicked because it is obscured by another element
+                // (such as a dialog).
+                $this->closeDialog();
+            }
         }
+        while (++$attempts < 3);
 
-        $element->click();
+        throw new \RuntimeException("Could not click the secondary navigation link with text '$link_text' after three attempts.");
     }
 
     /**
