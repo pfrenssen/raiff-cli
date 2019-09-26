@@ -72,10 +72,10 @@ class InLeva extends TransferBase
             $this->chooseAccount($account);
 
             // Fill in the fields.
-            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_PayeeName', $transaction['recipient']['name']);
-            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_PayeeIBAN', $transaction['recipient']['iban']);
-            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_Amount', $transaction['amount']);
-            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_Description1', $transaction['description']);
+            $this->session->getPage()->fillField('Name', $transaction['recipient']['name']);
+            $this->session->getPage()->fillField('IBAN', $transaction['recipient']['iban']);
+            $this->session->getPage()->fillField('Amount', $transaction['amount']);
+            $this->session->getPage()->fillField('Details', $transaction['description']);
 
             // If the amount is over 30000 leva the origin of the funds needs to
             // be declared.
