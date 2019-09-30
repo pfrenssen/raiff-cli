@@ -75,7 +75,7 @@ class Sign extends CommandBase
         $this->clickLinkButton($button_id);
 
         // Wait for the dialog box to appear.
-        $this->waitForElementPresence('input#id_Model_Response');
+        $this->waitForElementPresence('.modal-confirmation input');
 
         // Confirm any declarations of origin of money that are present in the
         // dialog box.
@@ -91,18 +91,14 @@ class Sign extends CommandBase
             }
         }
 
-        // Retrieve the challenge.
-        $element = $this->session->getPage()->find('xpath', '//span[contains(@data-bind, "Model.Challenge")]');
-        $challenge = trim($element->getText());
-
         // Ask the response in the console.
         $helper = $this->getHelper('question');
-        $question = new Question('Challenge: ' . $challenge . '. Response: ');
+        $question = new Question('Code sent by SMS: ');
         $question->setValidator([$this, 'numericValidator']);
         $response = trim($helper->ask($input, $output, $question));
 
         // Fill in the response in the form.
-        $this->session->getPage()->fillField('id_Model_Response', $response);
+        $this->session->getPage()->fillField('SMS Code', $response);
         $this->clickLinkButton('OK');
         $this->waitForSuccessMessage();
 
