@@ -705,7 +705,7 @@ JS;
         $attempts = 0;
         do {
             try {
-                $this->waitForElementPresence('//input[contains(@data-bind, "Model.UserName")]', 'xpath');
+                $this->waitForElementPresence('//input[contains(@data-bind, "Model.UserName") and contains(@id, "Model_UserName")]', 'xpath');
                 $this->session->getPage()->fillField('User name', $config->get('credentials.username'));
                 $this->session->getPage()->fillField('Password', $config->get('credentials.password'));
                 $this->session->getPage()->find('css', '.btn-login')->click();
