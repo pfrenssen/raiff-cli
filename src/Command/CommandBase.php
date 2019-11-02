@@ -647,10 +647,18 @@ JS;
      *   The ID of the select box.
      * @param string $element_text
      *   The element text of the option that should be selected.
+     * @param bool $strict_id
+     *   Whether or not to do a strict check for the element ID. Set to FALSE
+     *   to allow a partial ID match.
      */
-    protected function selectOptionByElementText(string $select_id, string $element_text): void
+    protected function selectOptionByElementText(string $select_id, string $element_text, bool $strict_id = TRUE): void
     {
-        $select_element = $this->session->getPage()->findById($select_id);
+        if ($strict_id) {
+            $select_element = $this->session->getPage()->findById($select_id);
+        }
+        else {
+            $select_element = $this->session->getPage()->find('xpath', '//*[contains(@id, "' . $select_id . '")]');
+        }
         $option_element = $select_element->find('named', array('option', $element_text));
         if (!$option_element->isSelected()) {
             $option_element->click();

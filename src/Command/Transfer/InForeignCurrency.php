@@ -74,26 +74,34 @@ class InForeignCurrency extends TransferBase
             $this->chooseAccount($account);
 
             // Fill in the fields.
-            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_PayeeName', $transaction['recipient']['name']);
-            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_PayeeAccountNumber', $transaction['recipient']['iban']);
-            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_PayeeAddress', $transaction['recipient']['address']);
-            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_PayeeBankSWIFT', $transaction['recipient']['bic']);
-            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_Amount', $transaction['amount']);
-            $this->session->getPage()->fillField('id_Model_GenericPayment_Document_Model_Description', $transaction['description']);
+            $this->waitForElementPresence('//input[contains(@id, "Model_GenericPayment_Document_Model_PayeeName")]', 'xpath');
+            $field = $this->session->getPage()->find('xpath', '//input[contains(@id, "Model_GenericPayment_Document_Model_PayeeName")]');
+            $field->setValue($transaction['recipient']['name']);
+            $field = $this->session->getPage()->find('xpath', '//input[contains(@id, "Model_GenericPayment_Document_Model_PayeeAccountNumber")]');
+            $field->setValue($transaction['recipient']['iban']);
+            $field = $this->session->getPage()->find('xpath', '//input[contains(@id, "Model_GenericPayment_Document_Model_PayeeAddress")]');
+            $field->setValue($transaction['recipient']['address']);
+            $field = $this->session->getPage()->find('xpath', '//input[contains(@id, "Model_GenericPayment_Document_Model_PayeeBankSWIFT")]');
+            $field->setValue($transaction['recipient']['bic']);
+            $field = $this->session->getPage()->find('xpath', '//input[contains(@id, "Model_GenericPayment_Document_Model_Amount")]');
+            $field->setValue($transaction['amount']);
+            $field = $this->session->getPage()->find('xpath', '//input[contains(@id, "Model_GenericPayment_Document_Model_Description")]');
+            $field->setValue($transaction['description']);
 
             // Select the currency.
             // @todo Support currencies other than EUR.
-            $this->selectOptionByElementText('id_Model_GenericPayment_Document_SelectedCCY', 'EUR');
+            $this->selectOptionByElementText('Model_GenericPayment_Document_SelectedCCY', 'EUR', FALSE);
 
             // Select the country.
             // @todo Support countries other than Belgium.
-            $this->session->getPage()->selectFieldOption('id_Model_GenericPayment_Document_Model_PayeeBankCountryCode', '056');
+            $field = $this->session->getPage()->find('xpath', '//select[contains(@id, "Model_GenericPayment_Document_Model_PayeeBankCountryCode")]');
+            $field->selectOption('056');
 
             // Select the operation type.
             // @todo Support other operation types.
-            $this->selectOptionByElementText('id_Model_OpCodeBNBInfo_SelectedOpMode', 'Transfers');
+            $this->selectOptionByElementText('Model_OpCodeBNBInfo_SelectedOpMode', 'Transfers', FALSE);
             // @todo Support other operations than "Other private transfers".
-            $this->selectOptionByElementText('id_Model_OpCodeBNBInfo_SelectedOpCode', 'Other private transfers');
+            $this->selectOptionByElementText('Model_OpCodeBNBInfo_SelectedOpCode', 'Other private transfers', FALSE);
 
             // Submit the form.
             $this->clickLinkButton('Save');
