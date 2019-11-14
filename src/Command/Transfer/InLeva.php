@@ -80,7 +80,8 @@ class InLeva extends TransferBase
             // If the amount is over 30000 leva the origin of the funds needs to
             // be declared.
             if ($transaction['amount'] > 30000.00 && !empty($transaction['origin'])) {
-                $this->session->getPage()->fillField('id_Model_DirtyMoney_Model_DirtyMoney', $transaction['origin']);
+                $select_element = $this->session->getPage()->find('xpath', '//select[contains(@id, "Model_DirtyMoney_Model_DirtyMoney")]');
+                $select_element->setValue(array_search($transaction['origin'], static::getFundOrigins()));
             }
 
             // Submit the form.

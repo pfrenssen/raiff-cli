@@ -294,26 +294,26 @@ abstract class TransferBase extends CommandBase
      * Returns the possible fund origins.
      *
      * @return array
-     *   Array containing possible fund origins.
+     *   Array containing possible fund origins, keyed by option value.
      */
     protected static function getFundOrigins() {
         return [
-            'Commercial activity',
-            'Agricultural activity',
-            'Personal labour services',
-            'Liberal labour services',
-            'Received loan',
-            'Real estate sale',
-            'Vehicle sale',
-            'Received rent',
-            'Donation',
-            'Savings',
-            'Inheritance',
-            'Labour remuneration',
-            'Dividend',
-            'Insurance paid',
-            'Deal with financial instruments',
-            'Other income from legal activity',
+            '1' => 'Commercial activity',
+            '2' => 'Agricultural activity',
+            '3' => 'Personal labour services',
+            '4' => 'Liberal profession services',
+            '5' => 'Received loan',
+            '6' => 'Real estate sale',
+            '7' => 'Vehicle sale',
+            '8' => 'Received rent',
+            '9' => 'Donation',
+            '10' => 'Savings',
+            '11' => 'Inheritance',
+            '12' => 'Labour remuneration',
+            '13' => 'Dividend',
+            '14' => 'Insurance paid',
+            '15' => 'Deal with financial instruments',
+            '16' => 'Other income from legal activity',
         ];
     }
 
