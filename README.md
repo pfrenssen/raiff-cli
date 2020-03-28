@@ -13,7 +13,7 @@ user clicking through the website.
 
 ## Requirements
 
-This requires PHP 5.6 or higher, and either Selenium 2 or PhantomJS.
+This requires PHP 7.1 or higher, and either Selenium 2 or PhantomJS.
 
 Running Selenium 2:
 
